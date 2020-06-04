@@ -8,16 +8,16 @@ int main() {
     constexpr float LEARNING_RATE = 1e-3;
 
     Agent::Params params;
-    Agent::load("../logs/params.bin", params);
+    Agent::load("./logs/params.bin", params);
 
-    std::ofstream log_train = Agent::log_training_csv("../logs/log_train.csv");
-    std::ofstream log_eval  = Agent::log_evaluation_csv("../logs/log_eval.csv");
+    std::ofstream log_train = Agent::log_training_csv("./logs/log_train.csv");
+    std::ofstream log_eval  = Agent::log_evaluation_csv("./logs/log_eval.csv");
 
     for (int epoch = 29; epoch < TRAIN_EPOCHS; epoch++) {
 
         // Perform one epoch of training
         Agent::train_agent(epoch, TRAIN_GAMES, LEARNING_RATE, params, log_train);
-        Agent::save("../logs/params.bin", params);
+        Agent::save("./logs/params.bin", params);
 
         Agent::evaluate_agent(epoch, 1000, 1, params, log_eval);
         Agent::evaluate_agent(epoch,  100, 2, params, log_eval);
