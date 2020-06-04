@@ -9,7 +9,7 @@ namespace Game {
 
     constexpr State EMPTY_STATE = 0;
 
-    constexpr int MAX_TILE    = 15;
+    constexpr int MAX_TILE    = 12;
     constexpr int EDGE_SIZE   = 4;
     constexpr int BOARD_SIZE  = EDGE_SIZE * EDGE_SIZE;
     constexpr int NUM_ACTIONS = 4;
