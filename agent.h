@@ -9,7 +9,7 @@
 
 namespace Agent {
 
-    constexpr int CPU_THREADS = 7;
+    constexpr int CPU_THREADS = 18;
 
     constexpr int NTUPLE_SIZE_0 = 6, NTUPLE_SIZE_1 = 6, NTUPLE_SIZE_2 = 6, NTUPLE_SIZE_3 = 6;
 
