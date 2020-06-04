@@ -5,7 +5,7 @@ int main() {
 
     constexpr int   TRAIN_GAMES   = 30000;
     constexpr int   TRAIN_EPOCHS  = 1000;
-    constexpr float LEARNING_RATE = 1e-3;
+    constexpr float LEARNING_RATE = 1e-2;
 
     Agent::Params params;
     //Agent::load("./logs/params.bin", params);

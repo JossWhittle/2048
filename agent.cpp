@@ -54,25 +54,29 @@ float Agent::evaluate_state(const Game::State &state, const Agent::Params &param
     const Game::State  s_31 = Game::rot270(s_01);
 
     // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
-    const float &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
-                &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
-                &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
-                &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31)),
-                
-                &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
-                &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
-                &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
-                &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31)),
-                
-                &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
-                &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
-                &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
-                &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31)),
-                
-                &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
-                &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
-                &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
-                &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
+    const Agent::NTupleTable_0::NTupleValue
+            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
+            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
+            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
+            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
+
+    const Agent::NTupleTable_1::NTupleValue
+            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
+            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
+            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
+            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
+
+    const Agent::NTupleTable_2::NTupleValue
+            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
+            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
+            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
+            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
+
+    const Agent::NTupleTable_3::NTupleValue
+            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
+            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
+            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
+            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
 
     // Response is sum over all retinas
     const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
@@ -83,7 +87,73 @@ float Agent::evaluate_state(const Game::State &state, const Agent::Params &param
     return observed_value;
 }
 
-float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::Params &params) {
+//float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::Params &params) {
+//    // Unpack Agent parameters as modifiable references
+//    Agent::NTupleTable_0 &table_0 = params.table_0;
+//    Agent::NTupleTable_1 &table_1 = params.table_1;
+//    Agent::NTupleTable_2 &table_2 = params.table_2;
+//    Agent::NTupleTable_3 &table_3 = params.table_3;
+//
+//    // Apply each retina and table 8 times for each symmetry
+//    const Game::State &s_00 = state;
+//    const Game::State  s_10 = Game::rot90(state);
+//    const Game::State  s_20 = Game::rot180(state);
+//    const Game::State  s_30 = Game::rot270(state);
+//    const Game::State  s_01 = Game::flip(state);
+//    const Game::State  s_11 = Game::rot90(s_01);
+//    const Game::State  s_21 = Game::rot180(s_01);
+//    const Game::State  s_31 = Game::rot270(s_01);
+//
+//    // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
+//    Agent::NTupleTable_0::NTupleValue
+//            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
+//            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
+//            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
+//            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
+//
+//    Agent::NTupleTable_1::NTupleValue
+//            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
+//            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
+//            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
+//            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
+//
+//    Agent::NTupleTable_2::NTupleValue
+//            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
+//            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
+//            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
+//            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
+//
+//    Agent::NTupleTable_3::NTupleValue
+//            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
+//            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
+//            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
+//            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
+//
+//    // Response is sum over all retinas
+//    const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
+//                               + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
+//                               + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
+//                               + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
+//
+//    // TD(0) Temporal Difference Learning
+//    const float error = expected_value - observed_value;
+//    const float delta = error * learning_rate;
+//
+//    // Update all NTupleTables at all the accessed addresses
+//    t_0_00 += delta; t_0_10 += delta; t_0_20 += delta; t_0_30 += delta;
+//    t_0_01 += delta; t_0_11 += delta; t_0_21 += delta; t_0_31 += delta;
+//    t_1_00 += delta; t_1_10 += delta; t_1_20 += delta; t_1_30 += delta;
+//    t_1_01 += delta; t_1_11 += delta; t_1_21 += delta; t_1_31 += delta;
+//    t_2_00 += delta; t_2_10 += delta; t_2_20 += delta; t_2_30 += delta;
+//    t_2_01 += delta; t_2_11 += delta; t_2_21 += delta; t_2_31 += delta;
+//    t_3_00 += delta; t_3_10 += delta; t_3_20 += delta; t_3_30 += delta;
+//    t_3_01 += delta; t_3_11 += delta; t_3_21 += delta; t_3_31 += delta;
+//
+//    // Return L1 loss
+//    return std::abs(error);
+//}
+
+float Agent::update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::Params &params) {
     // Unpack Agent parameters as modifiable references
     Agent::NTupleTable_0 &table_0 = params.table_0;
     Agent::NTupleTable_1 &table_1 = params.table_1;
@@ -101,47 +171,52 @@ float Agent::update_state_TD0(const Game::State &state, const float &expected_va
     const Game::State  s_31 = Game::rot270(s_01);
 
     // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
-    float &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
-          &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
-          &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
-          &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31)),
+    Agent::NTupleTable_0::NTupleValue
+            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
+            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
+            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
+            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
 
-          &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
-          &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
-          &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
-          &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31)),
+    Agent::NTupleTable_1::NTupleValue
+            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
+            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
+            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
+            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
 
-          &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
-          &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
-          &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
-          &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31)),
+    Agent::NTupleTable_2::NTupleValue
+            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
+            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
+            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
+            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
 
-          &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
-          &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
-          &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
-          &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
+    Agent::NTupleTable_3::NTupleValue
+            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
+            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
+            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
+            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
 
     // Response is sum over all retinas
     const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
                                + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
                                + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
                                + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
-    
-    // TD(0) Temporal Difference Learning
+
+    // TC(0) Temporal Coherence Learning
     const float error = expected_value - observed_value;
-    const float delta = error * learning_rate;
 
     // Update all NTupleTables at all the accessed addresses
-    t_0_00 += delta; t_0_10 += delta; t_0_20 += delta; t_0_30 += delta;
-    t_0_01 += delta; t_0_11 += delta; t_0_21 += delta; t_0_31 += delta;
-    t_1_00 += delta; t_1_10 += delta; t_1_20 += delta; t_1_30 += delta;
-    t_1_01 += delta; t_1_11 += delta; t_1_21 += delta; t_1_31 += delta;
-    t_2_00 += delta; t_2_10 += delta; t_2_20 += delta; t_2_30 += delta;
-    t_2_01 += delta; t_2_11 += delta; t_2_21 += delta; t_2_31 += delta;
-    t_3_00 += delta; t_3_10 += delta; t_3_20 += delta; t_3_30 += delta;
-    t_3_01 += delta; t_3_11 += delta; t_3_21 += delta; t_3_31 += delta;
+    t_0_00.update(error, learning_rate); t_0_10.update(error, learning_rate); t_0_20.update(error, learning_rate); t_0_30.update(error, learning_rate);
+    t_0_01.update(error, learning_rate); t_0_11.update(error, learning_rate); t_0_21.update(error, learning_rate); t_0_31.update(error, learning_rate);
 
-    // Return L1 loss
+    t_1_00.update(error, learning_rate); t_1_10.update(error, learning_rate); t_1_20.update(error, learning_rate); t_1_30.update(error, learning_rate);
+    t_1_01.update(error, learning_rate); t_1_11.update(error, learning_rate); t_1_21.update(error, learning_rate); t_1_31.update(error, learning_rate);
+
+    t_2_00.update(error, learning_rate); t_2_10.update(error, learning_rate); t_2_20.update(error, learning_rate); t_2_30.update(error, learning_rate);
+    t_2_01.update(error, learning_rate); t_2_11.update(error, learning_rate); t_2_21.update(error, learning_rate); t_2_31.update(error, learning_rate);
+
+    t_3_00.update(error, learning_rate); t_3_10.update(error, learning_rate); t_3_20.update(error, learning_rate); t_3_30.update(error, learning_rate);
+    t_3_01.update(error, learning_rate); t_3_11.update(error, learning_rate); t_3_21.update(error, learning_rate); t_3_31.update(error, learning_rate);
+
     return std::abs(error);
 }
 
@@ -272,6 +347,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
             trace.push(Agent::Trace{ transition.after_state, new_state });
 //            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+//            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
 //            sum_weight++;
 
             // Update to the next state
@@ -281,7 +357,8 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
         while (!trace.empty()) {
             const auto   &transition = trace.top();
             const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
-            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+//            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
             sum_weight++;
             trace.pop();
         }

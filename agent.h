@@ -13,10 +13,10 @@ namespace Agent {
 
     constexpr int NTUPLE_SIZE_0 = 6, NTUPLE_SIZE_1 = 6, NTUPLE_SIZE_2 = 6, NTUPLE_SIZE_3 = 6;
 
-    using NTupleTable_0 = NTupleTable<NTUPLE_SIZE_0, Game::MAX_TILE+1, Game::State>;
-    using NTupleTable_1 = NTupleTable<NTUPLE_SIZE_1, Game::MAX_TILE+1, Game::State>;
-    using NTupleTable_2 = NTupleTable<NTUPLE_SIZE_2, Game::MAX_TILE+1, Game::State>;
-    using NTupleTable_3 = NTupleTable<NTUPLE_SIZE_3, Game::MAX_TILE+1, Game::State>;
+    using NTupleTable_0 = NTupleTable<NTUPLE_SIZE_0, Game::MAX_TILE+1>;
+    using NTupleTable_1 = NTupleTable<NTUPLE_SIZE_1, Game::MAX_TILE+1>;
+    using NTupleTable_2 = NTupleTable<NTUPLE_SIZE_2, Game::MAX_TILE+1>;
+    using NTupleTable_3 = NTupleTable<NTUPLE_SIZE_3, Game::MAX_TILE+1>;
 
     // Utility structure to keep multiple NTupleTables together
     struct Params {
@@ -41,7 +41,8 @@ namespace Agent {
     float evaluate_state(const Game::State &state, const Params &params);
 
     // TD(0) Temporal Difference Learning update params to move estimate for state closer to the target value
-    float update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Params &params);
+//    float update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Params &params);
+    float update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Params &params);
 
     // Expectimax search for best action from the current state
     float            expectimax_estimate_chance_value(  const Game::State &state, const int depth, const Params &params);
