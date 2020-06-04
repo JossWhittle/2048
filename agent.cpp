@@ -252,7 +252,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
-        Game::State state = Game::place_random_tile(0, Game::rand_state(), (1 + (game % (Game::Tiles::TILE_32768 - 1))));
+        Game::State state = Game::place_random_tile(0, Game::rand_state(), (1 + (game % (Game::Tiles::TILE_32768))));
 
         for (int step = 0;; step++) {
 
