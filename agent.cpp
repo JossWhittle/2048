@@ -1,6 +1,8 @@
 #include <iomanip>
 #include <iostream>
 #include <chrono>
+#include <stack>
+#include <tuple>
 
 #include "game.h"
 #include "ntuple.h"
@@ -173,7 +175,7 @@ float Agent::expectimax_estimate_chance_value(const Game::State &state, const in
     }
 
     // Weighted average over potential chance states
-    return (sum_chance_value / sum_weight);
+    return (sum_chance_value > 0) ? (sum_chance_value / sum_weight) : 0;
 }
 
 float Agent::expectimax_search_max_action_value(const Game::State &state, const int depth, const Agent::Params &params) {
@@ -181,19 +183,19 @@ float Agent::expectimax_search_max_action_value(const Game::State &state, const 
     float max_value = 0;
 
     for (int action = Game::Action::UP; action < Game::NUM_ACTIONS; action++) {
-        // Try out each action and compare the values of the transitions to afterstates
+        // Try out each action and compare the values of the transitions to after_states
         const Game::Transition transition = Game::transition(state, static_cast<Game::Action>(action));
 
         // Don't consider any action that does not change the game state
         if (transition.terminal) continue;
 
-        // Value of this action is the sum of the local reward and the value of the afterstate
+        // Value of this action is the sum of the local reward and the value of the after_state
         float value = transition.reward;
         if (depth > 1) {
-            value += Agent::expectimax_estimate_chance_value(transition.afterstate, (depth - 1), params);
+            value += Agent::expectimax_estimate_chance_value(transition.after_state, (depth - 1), params);
         }
         else {
-            value += Agent::evaluate_state(transition.afterstate, params);
+            value += Agent::evaluate_state(transition.after_state, params);
         }
 
         // Select the highest value
@@ -209,19 +211,19 @@ Game::Transition Agent::expectimax_search_max_transition(const Game::State &stat
     float max_value = 0;
 
     for (int action = Game::Action::UP; action < Game::NUM_ACTIONS; action++) {
-        // Try out each action and compare the values of the transitions to afterstates
+        // Try out each action and compare the values of the transitions to after_states
         const Game::Transition transition = Game::transition(state, static_cast<Game::Action>(action));
 
         // Don't consider any action that does not change the game state
         if (transition.terminal) continue;
 
-        // Value of this action is the sum of the local reward and the value of the afterstate
+        // Value of this action is the sum of the local reward and the value of the after_state
         float value = transition.reward;
         if (depth > 1) {
-            value += Agent::expectimax_estimate_chance_value(transition.afterstate, (depth - 1), params);
+            value += Agent::expectimax_estimate_chance_value(transition.after_state, (depth - 1), params);
         }
         else {
-            value += Agent::evaluate_state(transition.afterstate, params);
+            value += Agent::evaluate_state(transition.after_state, params);
         }
 
         // Select the highest value
@@ -240,10 +242,13 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     auto start_time = std::chrono::high_resolution_clock::now();
 
     // Variables for accumulating statistics
-    float avg_loss = 0;
+    float sum_loss = 0, sum_weight = 0;
+
+    std::stack<Agent::Trace> trace;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
-    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:avg_loss)
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) \
+                             reduction(+:sum_loss,sum_weight) private(trace)
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
@@ -258,17 +263,27 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
             if (transition.terminal) break;
 
             // Place a random tile
-            const Game::State new_state = Game::place_random_tile(transition.afterstate, Game::rand_state(), Game::rand_tile());
+            const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(), Game::rand_tile());
 
             // If placing a tile puts the game into a terminal state then end the game
             if ((state == new_state) || Game::terminal(new_state)) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
-            avg_loss += Agent::update_state_TD0(transition.afterstate, target_value, learning_rate, params);
+            trace.push({ transition.after_state, new_state });
+//            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
+//            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+//            sum_weight++;
 
             // Update to the next state
             state = new_state;
+        }
+
+        while (!trace.empty()) {
+            const auto &transition = trace.top();
+            const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
+            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+            sum_weight++;
+            trace.pop();
         }
     }
 
@@ -280,13 +295,13 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     log  << epoch << ','
          << num_games << ','
          << std::setprecision(4) << delta_time << ','
-         << std::setprecision(4) << ((float) avg_loss / (float) num_games) << ','
+         << std::setprecision(4) << (sum_loss / sum_weight) << ','
          << std::setprecision(4) << learning_rate << std::endl;
 
     std::cout << std::endl << "Epoch " << epoch << " training   completed in "
               << std::setprecision(4) << (delta_time / 1000.f) << " seconds..." << std::endl;
 
-    return avg_loss;
+    return (sum_loss / sum_weight);
 }
 
 void Agent::evaluate_agent(const int epoch, const int num_games, const int depth, const Agent::Params &params, std::ostream &log) {
@@ -322,7 +337,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
             if (transition.terminal) break;
 
             // Place a random tile
-            const Game::State new_state = Game::place_random_tile(transition.afterstate, Game::rand_state(), Game::rand_tile());
+            const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(), Game::rand_tile());
 
             // If placing a tile puts the game into a terminal state then end the game
             if ((state == new_state) || Game::terminal(new_state)) break;

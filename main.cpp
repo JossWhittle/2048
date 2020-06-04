@@ -13,7 +13,7 @@ int main() {
     std::ofstream log_train = Agent::log_training_csv("./logs/log_train.csv");
     std::ofstream log_eval  = Agent::log_evaluation_csv("./logs/log_eval.csv");
 
-    for (int epoch = 29; epoch < TRAIN_EPOCHS; epoch++) {
+    for (int epoch = 0; epoch < TRAIN_EPOCHS; epoch++) {
 
         // Perform one epoch of training
         Agent::train_agent(epoch, TRAIN_GAMES, LEARNING_RATE, params, log_train);

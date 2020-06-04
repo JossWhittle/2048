@@ -104,7 +104,7 @@ namespace Game {
     struct Transition {
         State  state;
         Action action;
-        State  afterstate;
+        State  after_state;
         float  reward;
         bool   terminal;
     };
