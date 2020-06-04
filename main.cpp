@@ -8,7 +8,7 @@ int main() {
     constexpr float LEARNING_RATE = 1e-3;
 
     Agent::Params params;
-    Agent::load("./logs/params.bin", params);
+    //Agent::load("./logs/params.bin", params);
 
     std::ofstream log_train = Agent::log_training_csv("./logs/log_train.csv");
     std::ofstream log_eval  = Agent::log_evaluation_csv("./logs/log_eval.csv");

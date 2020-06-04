@@ -78,18 +78,40 @@ Game::State Game::slide_left(const Game::State &state) {
 
 Game::State Game::merge_left(const Game::State &state, float &reward) {
     reward = 0;
+
+    bool terminal = false;
+
+    // Compact the zeros before merging
     State new_state = Game::slide_left(state);
+
+    // Merge each row
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
+
+        // For each tile, merge if it is next to the same tile
         for (int x = 1; x < Game::EDGE_SIZE; x++) {
             const Tile tile = Game::get_tile(new_state, y, x);
             if ((tile > 0) && (Game::get_tile(new_state, y, (x - 1)) == tile)) {
 
-                new_state = Game::set_tile(new_state, y, (x - 1), 0);
-                new_state = Game::set_tile(new_state, y, x, (tile + 1));
-                reward   += std::pow(2, (tile + 1));
+                // Reward is the sum of the two tiles merged
+                reward += std::pow(2, (tile + 1));
+
+                // If the maximum game tile has been reached then the next state is the null state
+                if (tile >= Game::MAX_TILE) {
+                    terminal = true;
+                    continue;
+                } else {
+                    // Otherwise merge the two tiles into the new state
+                    new_state = Game::set_tile(new_state, y, (x - 1), 0);
+                    new_state = Game::set_tile(new_state, y, x, (tile + 1));
+                }
             }
         }
     }
+
+    // Return the same state to indicate the game is over if we have reached the max tile
+    if (terminal) return state;
+
+    // Otherwise compact the zeros left after merging
     return Game::slide_left(new_state);
 }
 
@@ -145,7 +167,7 @@ Game::Tile Game::rand_tile() {
 }
 
 Game::Tile Game::uniform_rand_tile() {
-    return 1 + (Game::rand64() % 14);
+    return 1 + (Game::rand64() % (Game::MAX_TILE - 1));
 }
 
 Game::Transition Game::transition(const Game::State &state, const Game::Action &action) {

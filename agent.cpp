@@ -252,7 +252,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
-        Game::State state = Game::place_random_tile(0, Game::rand_state(), (1 + (game % (Game::Tiles::TILE_32768))));
+        Game::State state = Game::place_random_tile(0, Game::rand_state(), (1 + (game % (Game::MAX_TILE - 1))));
 
         for (int step = 0;; step++) {
 
@@ -269,7 +269,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
             if ((state == new_state) || Game::terminal(new_state)) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-            trace.push({ transition.after_state, new_state });
+            trace.push(Agent::Trace{ transition.after_state, new_state });
 //            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
 //            sum_weight++;
@@ -279,7 +279,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
         }
 
         while (!trace.empty()) {
-            const auto &transition = trace.top();
+            const auto   &transition = trace.top();
             const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
             sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
             sum_weight++;
@@ -384,15 +384,15 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
          << (int) (avg_score  / (float) num_games) << ','
          << (int) std::pow(2, maximum_tile) << ','
          << (int) std::pow(2, avg_tile  / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_128   / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_256   / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_512   / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_1024  / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_2048  / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_4096  / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_8192  / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_16384 / (float) num_games) << ','
-         << std::setprecision(4) << ((float) tile_32768 / (float) num_games) << std::endl;
+         << std::setprecision(4) << (tile_128   / (float) num_games) << ','
+         << std::setprecision(4) << (tile_256   / (float) num_games) << ','
+         << std::setprecision(4) << (tile_512   / (float) num_games) << ','
+         << std::setprecision(4) << (tile_1024  / (float) num_games) << ','
+         << std::setprecision(4) << (tile_2048  / (float) num_games) << ','
+         << std::setprecision(4) << (tile_4096  / (float) num_games) << ','
+         << std::setprecision(4) << (tile_8192  / (float) num_games) << ','
+         << std::setprecision(4) << (tile_16384 / (float) num_games) << ','
+         << std::setprecision(4) << (tile_32768 / (float) num_games) << std::endl;
 
     std::cout << "Epoch " << epoch << " evaluation completed in "
               << std::setprecision(4) << (delta_time / 1000.f) << " seconds..." << std::endl;
