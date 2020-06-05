@@ -48,6 +48,9 @@ int main() {
 
             // Perform one epoch of training on both the current phase and previous phase to fine tune the transition now the current phase is trained
             Agent::train_agent(epoch, TRAIN_GAMES, 0, (phase + 2), LEARNING_RATE, params, log_train);
+            
+            Agent::evaluate_agent(epoch, 1000, 0, (phase + 1), 1, params, log_eval);
+            Agent::evaluate_agent(epoch,  100, 0, (phase + 1), 2, params, log_eval);
             epoch++;
         }
     }

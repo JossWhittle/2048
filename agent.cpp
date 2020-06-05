@@ -606,8 +606,8 @@ void Agent::save(const std::string &path, const Agent::PhaseParams &phase_params
         params.table_1.save(file);
         params.table_2.save(file);
         params.table_3.save(file);
-        std::cout << "success." << std::endl;
     }
+    std::cout << "success." << std::endl;
 }
 
 void Agent::load(const std::string &path, Agent::Params &params) {
@@ -638,6 +638,6 @@ void Agent::load(const std::string &path, Agent::PhaseParams &phase_params) {
         params.table_1.load(file);
         params.table_2.load(file);
         params.table_3.load(file);
-        std::cout << "success." << std::endl;
     }
+    std::cout << "success." << std::endl;
 }
