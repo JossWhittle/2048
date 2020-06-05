@@ -7,8 +7,8 @@
 int main() {
 
     constexpr int   TRAIN_GAMES   = 30000;
-    constexpr int   TRAIN_EPOCHS  = 10;
-    constexpr float LEARNING_RATE = 1e-2;
+    constexpr int   TRAIN_EPOCHS  = 10, TUNE_EPOCHS = 10;
+    constexpr float LEARNING_RATE = (1e-2) / 1.75;
 
     std::ofstream log_train = Agent::log_training_csv("./logs/log_train.csv");
     std::ofstream log_eval  = Agent::log_evaluation_csv("./logs/log_eval.csv");
@@ -42,7 +42,10 @@ int main() {
             Agent::evaluate_agent(epoch,  100, 0, (phase + 1), 2, params, log_eval);
         }
 
-        if (phase > 0) {
+        for (int phase_epoch = 0; phase_epoch < TUNE_EPOCHS; phase_epoch++, epoch++) {
+
+            std::cout << std::endl << "Epoch " << epoch << ", Phase " << phase << ", Phase Epoch " << phase_epoch << " Tuning" << std::endl;
+
             // Perform one epoch of training on both the current phase and previous phase to fine tune the transition now the current phase is trained
             Agent::train_agent(epoch, TRAIN_GAMES, 0, (phase + 2), LEARNING_RATE, params, log_train);
             epoch++;
