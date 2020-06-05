@@ -7,7 +7,7 @@
 int main() {
 
     constexpr int   TRAIN_GAMES   = 30000;
-    constexpr int   TRAIN_EPOCHS  = 10;
+    constexpr int   TRAIN_EPOCHS  = 20;
     constexpr float LEARNING_RATE = (1e-2) / 1.75;
 
     std::ofstream log_train = Agent::log_training_csv("./logs/log_train.csv");
