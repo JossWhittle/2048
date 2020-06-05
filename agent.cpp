@@ -334,7 +334,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int phase, 
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > phase) || Game::terminal(state)) break;
+            if ((Agent::phase(state) > (phase + 1)) || Game::terminal(state)) break;
 
             // Expectimax search for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, params);
@@ -410,7 +410,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int phase
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > phase) || Game::terminal(state)) break;
+            if ((Agent::phase(state) > (phase + 1)) || Game::terminal(state)) break;
 
             // Expectimax search 1-ply for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, depth, params);
