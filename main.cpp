@@ -30,13 +30,13 @@ int main() {
             std::cout << std::endl << "Epoch " << epoch << ", Phase " << phase << ", Phase Epoch " << phase_epoch << std::endl;
 
             // Perform one epoch of training
-            Agent::train_agent(epoch, TRAIN_GAMES, phase, (phase + 1), LEARNING_RATE, params, log_train);
+            Agent::train_agent(epoch, TRAIN_GAMES, phase, (phase + 2), LEARNING_RATE, params, log_train);
 
             Agent::save([&]() {
                 std::stringstream sstr;
-                sstr << "./logs/params_" << phase << ".bin";
+                sstr << "./logs/params.bin";
                 return sstr.str();
-            }(), params[phase]);
+            }(), params);
 
             Agent::evaluate_agent(epoch, 1000, 0, (phase + 1), 1, params, log_eval);
             Agent::evaluate_agent(epoch,  100, 0, (phase + 1), 2, params, log_eval);
@@ -44,8 +44,8 @@ int main() {
 
         if (phase > 0) {
             // Perform one epoch of training on both the current phase and previous phase to fine tune the transition now the current phase is trained
+            Agent::train_agent(epoch, TRAIN_GAMES, 0, (phase + 2), LEARNING_RATE, params, log_train);
             epoch++;
-            Agent::train_agent(epoch, TRAIN_GAMES, (phase - 1), (phase + 1), LEARNING_RATE, params, log_train);
         }
     }
 
