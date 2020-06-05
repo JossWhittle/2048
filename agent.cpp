@@ -314,7 +314,7 @@ Game::Transition Agent::expectimax_search_max_transition(const Game::State &stat
     return max_transition;
 }
 
-float Agent::train_agent(const int epoch, const int num_games, const int phase, const float learning_rate, Agent::PhaseParams &params, std::ostream &log) {
+float Agent::train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const float learning_rate, Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -330,11 +330,11 @@ float Agent::train_agent(const int epoch, const int num_games, const int phase, 
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
-        Game::State state = Agent::random_phase_state(phase);
+        Game::State state = Agent::random_phase_state(start_phase);
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > (phase + 1)) || Game::terminal(state)) break;
+            if ((Agent::phase(state) > end_phase) || Game::terminal(state)) break;
 
             // Expectimax search for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, params);
@@ -376,7 +376,8 @@ float Agent::train_agent(const int epoch, const int num_games, const int phase, 
     // Log data to log file
     log  << epoch << ','
          << num_games << ','
-         << phase << ','
+         << start_phase << ','
+         << end_phase << ','
          << std::setprecision(4) << delta_time << ','
          << std::setprecision(4) << (sum_loss / sum_weight) << ','
          << std::setprecision(4) << learning_rate << std::endl;
@@ -387,7 +388,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int phase, 
     return (sum_loss / sum_weight);
 }
 
-void Agent::evaluate_agent(const int epoch, const int num_games, const int phase, const int depth, const Agent::PhaseParams &params, std::ostream &log) {
+void Agent::evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const int depth, const Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -406,11 +407,11 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int phase
         
         // Play a single game
         float score = 0;
-        Game::State state = Agent::random_phase_state(0);
+        Game::State state = Agent::random_phase_state(start_phase);
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > (phase + 1)) || Game::terminal(state)) break;
+            if ((Agent::phase(state) > end_phase) || Game::terminal(state)) break;
 
             // Expectimax search 1-ply for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, depth, params);
@@ -447,7 +448,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int phase
 
         const int state_phase = Agent::phase(state);
         avg_phase += state_phase;
-        if (state_phase > maximum_phase) maximum_phase = phase;
+        if (state_phase > maximum_phase) maximum_phase = state_phase;
 
         // Accumulate sums for avgs
         avg_score += score;
@@ -467,7 +468,8 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int phase
     // Log data to log file
     log  << epoch << ','
          << num_games << ','
-         << phase << ','
+         << start_phase << ','
+         << end_phase << ','
          << depth << ','
          << std::setprecision(4) << delta_time << ','
          << (int) maximum_phase << ','
@@ -546,8 +548,15 @@ Game::State Agent::random_phase_state(const int phase) {
 
 std::ofstream Agent::log_evaluation_csv(const std::string &path) {
     std::ofstream log(path, std::ios_base::app);
+    std::cout << "Opening [ " << path << " ] ";
+    if (!log.is_open()) {
+        std::cout << "failed." << std::endl;
+        return log;
+    }
+    std::cout << "success." << std::endl;
+
     if (log.is_open() && (log.tellp() == 0)) {
-        log << "epoch,num_games,start_phase,depth,time,max_phase,avg_phase,max_score,avg_score,max_tile,avg_tile,"
+        log << "epoch,num_games,start_phase,end_phase,depth,time,max_phase,avg_phase,max_score,avg_score,max_tile,avg_tile,"
             << "tile_128,tile_256,tile_512,tile_1024,tile_2048,tile_4096,"
             << "tile_8192,tile_16384,tile_32768" << std::endl;
     }
@@ -556,48 +565,79 @@ std::ofstream Agent::log_evaluation_csv(const std::string &path) {
 
 std::ofstream Agent::log_training_csv(const std::string &path) {
     std::ofstream log(path, std::ios_base::app);
+    std::cout << "Opening [ " << path << " ] ";
+    if (!log.is_open()) {
+        std::cout << "failed." << std::endl;
+        return log;
+    }
+    std::cout << "success." << std::endl;
+
     if (log.is_open() && (log.tellp() == 0)) {
-        log << "epoch,num_games,start_phase,time,loss,learning_rate" << std::endl;
+        log << "epoch,num_games,start_phase,end_phase,time,loss,learning_rate" << std::endl;
     }
     return log;
 }
 
 void Agent::save(const std::string &path, const Agent::Params &params) {
     std::ofstream file(path, std::ios::binary);
-    if (!file.is_open()) return;
+    std::cout << "Saving [ " << path << " ] ";
+    if (!file.is_open()) {
+        std::cout << "failed." << std::endl;
+        return;
+    }
+
     params.table_0.save(file);
     params.table_1.save(file);
     params.table_2.save(file);
     params.table_3.save(file);
+    std::cout << "success." << std::endl;
 }
 
 void Agent::save(const std::string &path, const Agent::PhaseParams &phase_params) {
     std::ofstream file(path, std::ios::binary);
-    if (!file.is_open()) return;
+    std::cout << "Saving [ " << path << " ] ";
+    if (!file.is_open()) {
+        std::cout << "failed." << std::endl;
+        return;
+    }
+
     for (const auto &params : phase_params) {
         params.table_0.save(file);
         params.table_1.save(file);
         params.table_2.save(file);
         params.table_3.save(file);
+        std::cout << "success." << std::endl;
     }
 }
 
 void Agent::load(const std::string &path, Agent::Params &params) {
     std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) return;
+    std::cout << "Saving [ " << path << " ] ";
+    if (!file.is_open()) {
+        std::cout << "failed." << std::endl;
+        return;
+    }
+
     params.table_0.load(file);
     params.table_1.load(file);
     params.table_2.load(file);
     params.table_3.load(file);
+    std::cout << "success." << std::endl;
 }
 
 void Agent::load(const std::string &path, Agent::PhaseParams &phase_params) {
     std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) return;
+    std::cout << "Saving [ " << path << " ] ";
+    if (!file.is_open()) {
+        std::cout << "failed." << std::endl;
+        return;
+    }
+
     for (auto &params : phase_params) {
         params.table_0.load(file);
         params.table_1.load(file);
         params.table_2.load(file);
         params.table_3.load(file);
+        std::cout << "success." << std::endl;
     }
 }

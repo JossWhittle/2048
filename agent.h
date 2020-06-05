@@ -57,14 +57,16 @@ namespace Agent {
     Game::State random_phase_state(const int phase);
 
     // Play N games on the CPU and update parameters
-    float train_agent(const int epoch, const int num_games, const int phase, const float learning_rate, PhaseParams &params, std::ostream &log);
+    float train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const float learning_rate, PhaseParams &params, std::ostream &log);
 
     // Play N games on the CPU and evaluate performance
-    void evaluate_agent(const int epoch, const int num_games, const int phase, const int depth, const PhaseParams &params, std::ostream &log);
+    void evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const int depth, const PhaseParams &params, std::ostream &log);
 
     // Open a log file and write the column header
     std::ofstream log_training_csv(const std::string &path);
     std::ofstream log_evaluation_csv(const std::string &path);
+
+    void promote_params(const Params &params, Params &new_params);
 
     // Save and load parameters to binary file
     void save(const std::string &path, const Params &params);

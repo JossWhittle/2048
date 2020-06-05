@@ -59,6 +59,17 @@ public:
         return data[tuple_to_index(tuple)];
     }
 
+    void promote(const NTupleTable &other) {
+        int promoted = 0;
+        for (int i = 0; i < data.size(); i++) {
+            if (data[i] == 0) {
+                data[i] = other.data[i];
+                promoted++;
+            }
+        }
+        std::cout << "Promoted " << promoted << " params." << std::endl;
+    }
+
     void save(std::ofstream &stream) const {
         stream.write((const char*) &data[0], (data.size() * sizeof(float)));
     }
