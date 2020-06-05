@@ -9,7 +9,7 @@ namespace Game {
 
     constexpr State EMPTY_STATE = 0;
 
-    constexpr int MAX_TILE    = 12;
+    constexpr int MAX_TILE    = 14;
     constexpr int EDGE_SIZE   = 4;
     constexpr int BOARD_SIZE  = EDGE_SIZE * EDGE_SIZE;
     constexpr int NUM_ACTIONS = 4;
@@ -116,6 +116,7 @@ namespace Game {
     bool terminal(const State &state);
 
     Tile maximum_tile(const State &state);
+    bool has_tile(const State &state, const Game::Tile &tile);
 
     void  print_state(const State &state);
 }

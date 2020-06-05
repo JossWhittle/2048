@@ -36,12 +36,13 @@ Agent::NTupleTable_3::NTuple Agent::retina_3(const Game::State &state) {
     };
 }
 
-float Agent::evaluate_state(const Game::State &state, const Agent::Params &params) {
+float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &params) {
     // Unpack Agent parameters as non-modifiable references
-    const Agent::NTupleTable_0 &table_0 = params.table_0;
-    const Agent::NTupleTable_1 &table_1 = params.table_1;
-    const Agent::NTupleTable_2 &table_2 = params.table_2;
-    const Agent::NTupleTable_3 &table_3 = params.table_3;
+    const int phase = Agent::phase(state);
+    const Agent::NTupleTable_0 &table_0 = params[phase].table_0;
+    const Agent::NTupleTable_1 &table_1 = params[phase].table_1;
+    const Agent::NTupleTable_2 &table_2 = params[phase].table_2;
+    const Agent::NTupleTable_3 &table_3 = params[phase].table_3;
 
     // Apply each retina and table 8 times for each symmetry
     const Game::State &s_00 = state;
@@ -87,12 +88,13 @@ float Agent::evaluate_state(const Game::State &state, const Agent::Params &param
     return observed_value;
 }
 
-//float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::Params &params) {
+//float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
 //    // Unpack Agent parameters as modifiable references
-//    Agent::NTupleTable_0 &table_0 = params.table_0;
-//    Agent::NTupleTable_1 &table_1 = params.table_1;
-//    Agent::NTupleTable_2 &table_2 = params.table_2;
-//    Agent::NTupleTable_3 &table_3 = params.table_3;
+//    const int phase = Agent::phase(state);
+//    Agent::NTupleTable_0 &table_0 = params[phase].table_0;
+//    Agent::NTupleTable_1 &table_1 = params[phase].table_1;
+//    Agent::NTupleTable_2 &table_2 = params[phase].table_2;
+//    Agent::NTupleTable_3 &table_3 = params[phase].table_3;
 //
 //    // Apply each retina and table 8 times for each symmetry
 //    const Game::State &s_00 = state;
@@ -153,12 +155,13 @@ float Agent::evaluate_state(const Game::State &state, const Agent::Params &param
 //    return std::abs(error);
 //}
 
-float Agent::update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::Params &params) {
+float Agent::update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
     // Unpack Agent parameters as modifiable references
-    Agent::NTupleTable_0 &table_0 = params.table_0;
-    Agent::NTupleTable_1 &table_1 = params.table_1;
-    Agent::NTupleTable_2 &table_2 = params.table_2;
-    Agent::NTupleTable_3 &table_3 = params.table_3;
+    const int phase = Agent::phase(state);
+    Agent::NTupleTable_0 &table_0 = params[phase].table_0;
+    Agent::NTupleTable_1 &table_1 = params[phase].table_1;
+    Agent::NTupleTable_2 &table_2 = params[phase].table_2;
+    Agent::NTupleTable_3 &table_3 = params[phase].table_3;
 
     // Apply each retina and table 8 times for each symmetry
     const Game::State &s_00 = state;
@@ -220,7 +223,7 @@ float Agent::update_state_TC0(const Game::State &state, const float &expected_va
     return std::abs(error);
 }
 
-float Agent::expectimax_estimate_chance_value(const Game::State &state, const int depth, const Agent::Params &params) {
+float Agent::expectimax_estimate_chance_value(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
 
     float sum_chance_value = 0, sum_weight = 0;
 
@@ -253,7 +256,7 @@ float Agent::expectimax_estimate_chance_value(const Game::State &state, const in
     return (sum_chance_value > 0) ? (sum_chance_value / sum_weight) : 0;
 }
 
-float Agent::expectimax_search_max_action_value(const Game::State &state, const int depth, const Agent::Params &params) {
+float Agent::expectimax_search_max_action_value(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
 
     float max_value = 0;
 
@@ -280,7 +283,7 @@ float Agent::expectimax_search_max_action_value(const Game::State &state, const 
     return max_value;
 }
 
-Game::Transition Agent::expectimax_search_max_transition(const Game::State &state, const int depth, const Agent::Params &params) {
+Game::Transition Agent::expectimax_search_max_transition(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
 
     Game::Transition max_transition{};
     float max_value = 0;
@@ -311,7 +314,7 @@ Game::Transition Agent::expectimax_search_max_transition(const Game::State &stat
     return max_transition;
 }
 
-float Agent::train_agent(const int epoch, const int num_games, const float learning_rate, Agent::Params &params, std::ostream &log) {
+float Agent::train_agent(const int epoch, const int num_games, const int phase, const float learning_rate, Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -327,9 +330,11 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
-        Game::State state = Game::place_random_tile(0, Game::rand_state(), Game::rand_tile()); // (1 + (game % (Game::MAX_TILE - 1))
+        Game::State state = Agent::random_phase_state(phase);
 
         for (int step = 0;; step++) {
+
+            if ((Agent::phase(state) > phase) || Game::terminal(state)) break;
 
             // Expectimax search for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, params);
@@ -341,7 +346,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
             const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(), Game::rand_tile());
 
             // If placing a tile puts the game into a terminal state then end the game
-            if ((state == new_state) || Game::terminal(new_state)) break;
+            if (state == new_state) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
             trace.push(Agent::Trace{ transition.after_state, new_state });
@@ -371,6 +376,7 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     // Log data to log file
     log  << epoch << ','
          << num_games << ','
+         << phase << ','
          << std::setprecision(4) << delta_time << ','
          << std::setprecision(4) << (sum_loss / sum_weight) << ','
          << std::setprecision(4) << learning_rate << std::endl;
@@ -381,28 +387,30 @@ float Agent::train_agent(const int epoch, const int num_games, const float learn
     return (sum_loss / sum_weight);
 }
 
-void Agent::evaluate_agent(const int epoch, const int num_games, const int depth, const Agent::Params &params, std::ostream &log) {
+void Agent::evaluate_agent(const int epoch, const int num_games, const int phase, const int depth, const Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
 
     // Variables for accumulating statistics
-    float avg_score = 0, maximum_score = 0, avg_tile  = 0, maximum_tile  = 0, 
+    float avg_phase = 0, maximum_phase = 0, avg_score = 0, maximum_score = 0, avg_tile  = 0, maximum_tile  = 0,
           tile_128  = 0, tile_256  = 0, tile_512  = 0, tile_1024  = 0,
           tile_2048 = 0, tile_4096 = 0, tile_8192 = 0, tile_16384 = 0, tile_32768 = 0;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
     #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) \
-                             reduction(max : maximum_tile) \
-                             reduction( +  : avg_score,avg_tile,tile_128,tile_256,tile_512,tile_1024,\
+                             reduction(max : maximum_phase,maximum_score,maximum_tile) \
+                             reduction( +  : avg_phase,avg_score,avg_tile,tile_128,tile_256,tile_512,tile_1024,\
                                              tile_2048,tile_4096,tile_8192,tile_16384,tile_32768)
     for (int game = 0; game < num_games; game++) {
         
         // Play a single game
         float score = 0;
-        Game::State state = Game::place_random_tile(0, Game::rand_state(), Game::rand_tile());
+        Game::State state = Agent::random_phase_state(0);
 
         for (int step = 0;; step++) {
+
+            if ((Agent::phase(state) > phase) || Game::terminal(state)) break;
 
             // Expectimax search 1-ply for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, depth, params);
@@ -417,7 +425,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
             const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(), Game::rand_tile());
 
             // If placing a tile puts the game into a terminal state then end the game
-            if ((state == new_state) || Game::terminal(new_state)) break;
+            if (state == new_state) break;
 
             // Update to the next state
             state = new_state;
@@ -437,6 +445,10 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
         if (max_tile >= Game::Tiles::TILE_16384) tile_16384++;
         if (max_tile >= Game::Tiles::TILE_32768) tile_32768++;
 
+        const int state_phase = Agent::phase(state);
+        avg_phase += state_phase;
+        if (state_phase > maximum_phase) maximum_phase = phase;
+
         // Accumulate sums for avgs
         avg_score += score;
         avg_tile  += (float) max_tile;
@@ -455,8 +467,11 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
     // Log data to log file
     log  << epoch << ','
          << num_games << ','
+         << phase << ','
          << depth << ','
          << std::setprecision(4) << delta_time << ','
+         << (int) maximum_phase << ','
+         << (int) (avg_phase  / (float) num_games) << ','
          << (int) maximum_score << ','
          << (int) (avg_score  / (float) num_games) << ','
          << (int) std::pow(2, maximum_tile) << ','
@@ -475,10 +490,64 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int depth
               << std::setprecision(4) << (delta_time / 1000.f) << " seconds..." << std::endl;
 }
 
+int Agent::phase(const Game::State &state) {
+    if (Game::has_tile(state, Game::Tiles::TILE_32768)) {
+        return 16;
+    }
+
+    return (Game::has_tile(state, Game::Tiles::TILE_16384) ? 8 : 0) +
+           (Game::has_tile(state, Game::Tiles::TILE_8192)  ? 4 : 0) +
+           (Game::has_tile(state, Game::Tiles::TILE_4096)  ? 2 : 0) +
+           (Game::has_tile(state, Game::Tiles::TILE_2048)  ? 1 : 0);
+}
+
+Game::State Agent::random_phase_state(const int phase) {
+    if (phase == 0) {
+        return Game::place_random_tile(0, Game::rand_state(), Game::rand_tile());
+    }
+
+    if (phase >= 16) {
+        return Game::place_random_tile(0, Game::rand_state(), Game::Tiles::TILE_32768);
+    }
+
+    Game::State state = 0;
+    if (phase >= 8) {
+        state = Game::place_random_tile(state, Game::rand_state(), Game::Tiles::TILE_16384);
+    }
+    if ((phase >= 4 && phase <= 7) || (phase >= 12)) {
+        state = Game::place_random_tile(state, Game::rand_state(), Game::Tiles::TILE_8192);
+    }
+    if (phase == 2 || phase == 3 || phase == 6 || phase == 7 || phase == 10 || phase == 11 || phase == 14 || phase == 15) {
+        state = Game::place_random_tile(state, Game::rand_state(), Game::Tiles::TILE_4096);
+    }
+    if (phase == 1 || phase == 3 || phase == 5 || phase == 7 || phase == 9 || phase == 11 || phase == 13 || phase == 15) {
+        state = Game::place_random_tile(state, Game::rand_state(), Game::Tiles::TILE_2048);
+    }
+
+//    0     2 or 4
+//    1     2048
+//    2     4096
+//    3     4096  2048
+//    4     8192
+//    5     8192  2048
+//    6     8192  4096
+//    7     8192  4096 2048
+//    8     16384
+//    9     16384 2048
+//    10    16384 4096
+//    11    16384 4096 2048
+//    12    16384 8192
+//    13    16384 8192 2048
+//    14    16384 8192 4096
+//    15    16384 8192 4096 2048
+
+    return state;
+}
+
 std::ofstream Agent::log_evaluation_csv(const std::string &path) {
     std::ofstream log(path, std::ios_base::app);
     if (log.is_open() && (log.tellp() == 0)) {
-        log << "epoch,num_games,depth,time,max_score,avg_score,max_tile,avg_tile,"
+        log << "epoch,num_games,start_phase,depth,time,max_phase,avg_phase,max_score,avg_score,max_tile,avg_tile,"
             << "tile_128,tile_256,tile_512,tile_1024,tile_2048,tile_4096,"
             << "tile_8192,tile_16384,tile_32768" << std::endl;
     }
@@ -488,7 +557,7 @@ std::ofstream Agent::log_evaluation_csv(const std::string &path) {
 std::ofstream Agent::log_training_csv(const std::string &path) {
     std::ofstream log(path, std::ios_base::app);
     if (log.is_open() && (log.tellp() == 0)) {
-        log << "epoch,num_games,time,loss,learning_rate" << std::endl;
+        log << "epoch,num_games,start_phase,time,loss,learning_rate" << std::endl;
     }
     return log;
 }
@@ -502,6 +571,17 @@ void Agent::save(const std::string &path, const Agent::Params &params) {
     params.table_3.save(file);
 }
 
+void Agent::save(const std::string &path, const Agent::PhaseParams &phase_params) {
+    std::ofstream file(path, std::ios::binary);
+    if (!file.is_open()) return;
+    for (const auto &params : phase_params) {
+        params.table_0.save(file);
+        params.table_1.save(file);
+        params.table_2.save(file);
+        params.table_3.save(file);
+    }
+}
+
 void Agent::load(const std::string &path, Agent::Params &params) {
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) return;
@@ -509,4 +589,15 @@ void Agent::load(const std::string &path, Agent::Params &params) {
     params.table_1.load(file);
     params.table_2.load(file);
     params.table_3.load(file);
+}
+
+void Agent::load(const std::string &path, Agent::PhaseParams &phase_params) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) return;
+    for (auto &params : phase_params) {
+        params.table_0.load(file);
+        params.table_1.load(file);
+        params.table_2.load(file);
+        params.table_3.load(file);
+    }
 }
