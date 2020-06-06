@@ -39,6 +39,7 @@ Agent::NTupleTable_3::NTuple Agent::retina_3(const Game::State &state) {
 }
 
 float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &params) {
+
     // Unpack Agent parameters as non-modifiable references
     const int phase = Agent::phase(state);
     const Agent::NTupleTable_0 &table_0 = params[phase].table_0;
@@ -56,38 +57,51 @@ float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &
     const Game::State  s_21 = Game::rot180(s_01);
     const Game::State  s_31 = Game::rot270(s_01);
 
-    // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
-    const Agent::NTupleTable_0::NTupleValue
-            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
-            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
-            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
-            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
+    try {
+        // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
+        const Agent::NTupleTable_0::NTupleValue
+                &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
+                &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
+                &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
+                &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
 
-    const Agent::NTupleTable_1::NTupleValue
-            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
-            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
-            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
-            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
+        const Agent::NTupleTable_1::NTupleValue
+                &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
+                &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
+                &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
+                &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
 
-    const Agent::NTupleTable_2::NTupleValue
-            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
-            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
-            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
-            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
+        const Agent::NTupleTable_2::NTupleValue
+                &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
+                &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
+                &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
+                &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
 
-    const Agent::NTupleTable_3::NTupleValue
-            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
-            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
-            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
-            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
+        const Agent::NTupleTable_3::NTupleValue
+                &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
+                &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
+                &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
+                &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
 
-    // Response is sum over all retinas
-    const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
-                               + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
-                               + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
-                               + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
+        // Response is sum over all retinas
+        const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
+                                   + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
+                                   + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
+                                   + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
 
-    return observed_value;
+        return observed_value;
+    }
+    catch (const std::exception &ex) {
+
+        std::cout << "table_0  = " << table_0.size() << std::endl;
+        std::cout << "table_1  = " << table_0.size() << std::endl;
+        std::cout << "table_2  = " << table_0.size() << std::endl;
+        std::cout << "table_3  = " << table_0.size() << std::endl;
+        std::cout.flush();
+        throw ex;
+    }
+
+    return -1;
 }
 
 //float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
