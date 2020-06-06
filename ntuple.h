@@ -56,10 +56,8 @@ private:
                       << " diff " << ((long long) data.size() - address) << std::endl;
 
             std::cout.flush();
-            return 0;
+            throw std::runtime_error("WHAT THE ACTUAL FUCK IS HAPPENING?");
         }
-
-        if( data.size() > 0 ) throw std::runtime_error("WHAT THE ACTUAL FUCK IS HAPPENING?");
 
         return address;
     }
