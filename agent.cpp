@@ -93,10 +93,13 @@ float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &
     }
     catch (const std::exception &ex) {
 
-        std::cout << "table_0  = " << table_0.size() << std::endl;
-        std::cout << "table_1  = " << table_0.size() << std::endl;
-        std::cout << "table_2  = " << table_0.size() << std::endl;
-        std::cout << "table_3  = " << table_0.size() << std::endl;
+        for (int i = 0; i < params.size(); i++) {
+            std::cout << i << std::endl;
+            std::cout << "table_0  = " << params[i].table_0.size() << std::endl;
+            std::cout << "table_1  = " << params[i].table_0.size() << std::endl;
+            std::cout << "table_2  = " << params[i].table_0.size() << std::endl;
+            std::cout << "table_3  = " << params[i].table_0.size() << std::endl;
+        }
         std::cout.flush();
         throw ex;
     }
@@ -338,10 +341,10 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     // Variables for accumulating statistics
     float sum_loss = 0, sum_weight = 0;
 
-    //std::stack<Agent::Trace> trace;
+    //std::vector<Agent::Trace> trace;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
-    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight) //private(trace)
+    //#pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight)
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
@@ -364,7 +367,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
             if (state == new_state) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-//            trace.push(Agent::Trace{ transition.after_state, new_state });
+//            trace.push_back(Agent::Trace{ transition.after_state, new_state });
             const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
             sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
@@ -375,12 +378,12 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
         }
 
 //        while (!trace.empty()) {
-//            const auto   &transition = trace.top();
+//            const auto   &transition = trace.back();
 //            const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
 ////            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
 //            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
 //            sum_weight++;
-//            trace.pop();
+//            trace.pop_back();
 //        }
     }
 
