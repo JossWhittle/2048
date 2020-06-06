@@ -58,7 +58,7 @@ private:
         }
 
         if( data.size() > 0 ) std::exit(-1);
-        
+
         return address;
     }
 
@@ -68,6 +68,26 @@ public:
 
     ~NTupleTable() {
         std::cout << "NTupleTable DESTRUCTOR CALLED" << std::endl;
+    }
+
+    NTupleTable(const NTupleTable &other) : data(other.data) {
+        std::cout << "NTupleTable COPY CONSTRUCTOR CALLED" << std::endl;
+    }
+
+    NTupleTable& operator=(const NTupleTable &other) {
+        if (&other == this) return *this;
+        data = other.data;
+        std::cout << "NTupleTable COPY ASSIGNMENT CALLED" << std::endl;
+    }
+
+    NTupleTable(NTupleTable &&other) : data(std::move(other.data)) {
+        std::cout << "NTupleTable MOVE CONSTRUCTOR CALLED" << std::endl;
+    }
+
+    NTupleTable& operator=(NTupleTable &&other) {
+        if (&other == this) return *this;
+        data = std::move(other.data);
+        std::cout << "NTupleTable MOVE CONSTRUCTOR CALLED" << std::endl;
     }
 
     int size() const {
