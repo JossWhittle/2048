@@ -66,7 +66,14 @@ private:
 
 public:
 
-    NTupleTable() : data(std::llround(std::pow(DIM_SIZE, DIMS))) {}
+    NTupleTable() : data(std::llround(std::pow(DIM_SIZE, DIMS))) {
+        std::cout << "NTupleTable CONSTRUCTOR CALLED" << std::endl;
+
+        std::cout << "   &data[0] = " << ((unsigned long long) &data[0]) << std::endl;
+        std::cout << "data.size() = " << ((unsigned long long) data.size()) << std::endl;
+
+        std::cout.flush();
+    }
 
     ~NTupleTable() {
         std::cout << "NTupleTable DESTRUCTOR CALLED" << std::endl;
