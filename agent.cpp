@@ -4,6 +4,8 @@
 #include <stack>
 #include <tuple>
 
+#include <omp.h>
+
 #include "game.h"
 #include "ntuple.h"
 #include "agent.h"
@@ -322,12 +324,13 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     // Variables for accumulating statistics
     float sum_loss = 0, sum_weight = 0;
 
-    std::stack<Agent::Trace> trace;
+    std::array<std::stack<Agent::Trace>, Agent::CPU_THREADS> trace;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
-    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) \
-                             reduction(+:sum_loss,sum_weight) private(trace)
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight)
     for (int game = 0; game < num_games; game++) {
+
+        const int thead_num = omp_get_thread_num();
 
         // Place a random tile to start
         Game::State state = Agent::random_phase_state(start_phase);
@@ -349,7 +352,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
             if (state == new_state) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-            trace.push(Agent::Trace{ transition.after_state, new_state });
+            trace[thead_num].push(Agent::Trace{ transition.after_state, new_state });
 //            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
 //            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
@@ -359,13 +362,13 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
             state = new_state;
         }
 
-        while (!trace.empty()) {
-            const auto   &transition = trace.top();
+        while (!trace[thead_num].empty()) {
+            const auto   &transition = trace[thead_num].top();
             const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
             sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
             sum_weight++;
-            trace.pop();
+            trace[thead_num].pop();
         }
     }
 
