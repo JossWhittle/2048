@@ -52,6 +52,6 @@ int main() {
         std::cout << ex.what() << std::endl;
         std::cout.flush();
     }
-    
+
     return 0;
 }

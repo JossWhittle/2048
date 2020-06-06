@@ -59,7 +59,7 @@ private:
             return 0;
         }
 
-        if( data.size() > 0 ) throw std::runtime_error("WHAT THE ACTUAL FUCK IS HAPPENING?!??!");
+        if( data.size() > 0 ) throw std::runtime_error("WHAT THE ACTUAL FUCK IS HAPPENING?");
 
         return address;
     }
