@@ -57,6 +57,8 @@ private:
             return 0;
         }
 
+        if( data.size() > 0 ) std::exit(-1);
+        
         return address;
     }
 
@@ -73,12 +75,10 @@ public:
     }
 
     NTupleValue& operator()(const NTuple &tuple) {
-        assert( data.size() > 0 );
         return data[tuple_to_index(tuple)];
     }
 
     const NTupleValue& operator()(const NTuple &tuple) const {
-        assert( data.size() > 0 );
         return data[tuple_to_index(tuple)];
     }
 
