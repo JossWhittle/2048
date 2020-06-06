@@ -39,9 +39,10 @@ Agent::NTupleTable_3::NTuple Agent::retina_3(const Game::State &state) {
 }
 
 float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &params) {
+    const int phase = Agent::phase(state);
+    if (phase >= params.size()) return 0;
 
     // Unpack Agent parameters as non-modifiable references
-    const int phase = Agent::phase(state);
     const Agent::NTupleTable_0 &table_0 = params[phase].table_0;
     const Agent::NTupleTable_1 &table_1 = params[phase].table_1;
     const Agent::NTupleTable_2 &table_2 = params[phase].table_2;
@@ -57,54 +58,38 @@ float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &
     const Game::State  s_21 = Game::rot180(s_01);
     const Game::State  s_31 = Game::rot270(s_01);
 
-    try {
-        // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
-        const Agent::NTupleTable_0::NTupleValue
-                &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
-                &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
-                &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
-                &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
+    // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
+    const Agent::NTupleTable_0::NTupleValue
+            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
+            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
+            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
+            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
 
-        const Agent::NTupleTable_1::NTupleValue
-                &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
-                &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
-                &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
-                &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
+    const Agent::NTupleTable_1::NTupleValue
+            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
+            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
+            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
+            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
 
-        const Agent::NTupleTable_2::NTupleValue
-                &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
-                &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
-                &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
-                &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
+    const Agent::NTupleTable_2::NTupleValue
+            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
+            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
+            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
+            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
 
-        const Agent::NTupleTable_3::NTupleValue
-                &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
-                &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
-                &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
-                &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
+    const Agent::NTupleTable_3::NTupleValue
+            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
+            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
+            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
+            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
 
-        // Response is sum over all retinas
-        const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
-                                   + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
-                                   + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
-                                   + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
+    // Response is sum over all retinas
+    const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
+                               + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
+                               + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
+                               + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
 
-        return observed_value;
-    }
-    catch (const std::exception &ex) {
-
-        for (int i = 0; i < params.size(); i++) {
-            std::cout << i << std::endl;
-            std::cout << "table_0  = " << params[i].table_0.size() << std::endl;
-            std::cout << "table_1  = " << params[i].table_0.size() << std::endl;
-            std::cout << "table_2  = " << params[i].table_0.size() << std::endl;
-            std::cout << "table_3  = " << params[i].table_0.size() << std::endl;
-        }
-        std::cout.flush();
-        throw ex;
-    }
-
-    return -1;
+    return observed_value;
 }
 
 //float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
@@ -175,8 +160,10 @@ float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &
 //}
 
 float Agent::update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
-    // Unpack Agent parameters as modifiable references
     const int phase = Agent::phase(state);
+    if (phase >= params.size()) return 0;
+
+    // Unpack Agent parameters as modifiable references
     Agent::NTupleTable_0 &table_0 = params[phase].table_0;
     Agent::NTupleTable_1 &table_1 = params[phase].table_1;
     Agent::NTupleTable_2 &table_2 = params[phase].table_2;
@@ -341,10 +328,10 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     // Variables for accumulating statistics
     float sum_loss = 0, sum_weight = 0;
 
-    //std::vector<Agent::Trace> trace;
+    std::vector<Agent::Trace> trace;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
-    //#pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight)
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight) private(trace)
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
@@ -352,7 +339,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > end_phase) || Game::terminal(state)) break;
+            if ((Agent::phase(state) >= end_phase) || Game::terminal(state)) break;
 
             // Expectimax search for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, params);
@@ -367,24 +354,24 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
             if (state == new_state) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-//            trace.push_back(Agent::Trace{ transition.after_state, new_state });
-            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
+            trace.push_back(Agent::Trace{ transition.after_state, new_state });
+//            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
 //            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
-            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
-            sum_weight++;
+//            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
+//            sum_weight++;
 
             // Update to the next state
             state = new_state;
         }
 
-//        while (!trace.empty()) {
-//            const auto   &transition = trace.back();
-//            const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
-////            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
-//            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
-//            sum_weight++;
-//            trace.pop_back();
-//        }
+        while (!trace.empty()) {
+            const auto   &transition = trace.back();
+            const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
+//            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
+            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
+            sum_weight++;
+            trace.pop_back();
+        }
     }
 
     // Stop the clock, Carol
@@ -429,7 +416,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int start
 
         for (int step = 0;; step++) {
 
-            if ((Agent::phase(state) > end_phase) || Game::terminal(state)) break;
+            if ((Agent::phase(state) >= end_phase) || Game::terminal(state)) break;
 
             // Expectimax search 1-ply for best local action
             const Game::Transition transition = Agent::expectimax_search_max_transition(state, depth, params);

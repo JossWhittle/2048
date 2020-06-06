@@ -44,63 +44,14 @@ private:
         int address = 0, offset = 1;
         for (int i = 0; i < DIMS; i++) {
             address += ((int) tuple[i] * offset);
-            offset  *= DIM_SIZE;
+            offset *= DIM_SIZE;
         }
-
-        if (address >= data.size()) {
-            std::cout << "tuple ( ";
-            for (int i = 0; i < DIMS; i++) {
-                std::cout << (int) tuple[i] << ' ';
-            }
-            std::cout << ") address " << address << " size " << data.size()
-                      << " diff " << ((long long) data.size() - address) << std::endl;
-
-            std::cout.flush();
-            throw std::runtime_error("WHAT THE ACTUAL FUCK IS HAPPENING?");
-        }
-
         return address;
     }
 
 public:
 
-    NTupleTable() : data(std::llround(std::pow(DIM_SIZE, DIMS))) {
-        std::cout << "NTupleTable CONSTRUCTOR CALLED" << std::endl;
-
-        std::cout << "   &data[0] = " << ((unsigned long long) &data[0]) << std::endl;
-        std::cout << "data.size() = " << ((unsigned long long) data.size()) << std::endl;
-
-        std::cout.flush();
-    }
-
-    ~NTupleTable() {
-        std::cout << "NTupleTable DESTRUCTOR CALLED" << std::endl;
-        std::cout.flush();
-    }
-
-    NTupleTable(const NTupleTable &other) : data(other.data) {
-        std::cout << "NTupleTable COPY CONSTRUCTOR CALLED" << std::endl;
-        std::cout.flush();
-    }
-
-    NTupleTable& operator=(const NTupleTable &other) {
-        if (&other == this) return *this;
-        data = other.data;
-        std::cout << "NTupleTable COPY ASSIGNMENT CALLED" << std::endl;
-        std::cout.flush();
-    }
-
-    NTupleTable(NTupleTable &&other) : data(std::move(other.data)) {
-        std::cout << "NTupleTable MOVE CONSTRUCTOR CALLED" << std::endl;
-        std::cout.flush();
-    }
-
-    NTupleTable& operator=(NTupleTable &&other) {
-        if (&other == this) return *this;
-        data = std::move(other.data);
-        std::cout << "NTupleTable MOVE CONSTRUCTOR CALLED" << std::endl;
-        std::cout.flush();
-    }
+    NTupleTable() : data(std::llround(std::pow(DIM_SIZE, DIMS))) {}
 
     int size() const {
         return data.size();
