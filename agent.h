@@ -9,7 +9,7 @@
 
 namespace Agent {
 
-    constexpr int CPU_THREADS = 16;
+    constexpr int CPU_THREADS = 1;
 
     constexpr int NTUPLE_SIZE_0 = 6, NTUPLE_SIZE_1 = 6, NTUPLE_SIZE_2 = 6, NTUPLE_SIZE_3 = 6;
 
@@ -26,8 +26,8 @@ namespace Agent {
         NTupleTable_3 table_3;
     };
 
-    constexpr int NUM_PHASES = 15;
-    using PhaseParams = std::array<Agent::Params, NUM_PHASES>;
+    constexpr int NUM_PHASES = 4, END_PHASE = (NUM_PHASES + 1);
+    using PhaseParams = std::array<Agent::Params, NUM_PHASES+1>;
 
     // Each NTupleTable has a retina function that extracts the tuple values from a game state
     NTupleTable_0::NTuple retina_0(const Game::State &state);

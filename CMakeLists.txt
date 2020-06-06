@@ -3,6 +3,6 @@ project(2048)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Ofast -fopenmp") # -g -O0
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -O0 -fopenmp") # -Ofast
 
 add_executable(2048 main.cpp game.cpp agent.cpp)

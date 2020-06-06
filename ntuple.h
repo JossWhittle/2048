@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <vector>
 #include <array>
 #include <cmath>
@@ -40,10 +41,22 @@ private:
     std::vector<NTupleValue> data;
 
     int tuple_to_index(const NTuple &tuple) const {
-        int address = 0;
+        int address = 0, offset = 1;
         for (int i = 0; i < DIMS; i++) {
-            address += (tuple[i] * std::pow(DIM_SIZE, ((DIMS - 1) - i)));
+            address += ((int) tuple[i] * offset);
+            offset  *= DIM_SIZE;
         }
+
+        if (address >= data.size()) {
+            std::cout << "tuple ( ";
+            for (int i = 0; i < DIMS; i++) {
+                std::cout << (int) tuple[i] << ' ';
+            }
+            std::cout << ") address " << address << " size " << data.size()
+                      << " diff " << ((long long) data.size() - address) << std::endl;
+            return 0;
+        }
+
         return address;
     }
 
@@ -51,23 +64,22 @@ public:
 
     NTupleTable() : data(std::llround(std::pow(DIM_SIZE, DIMS))) {}
 
+    ~NTupleTable() {
+        std::cout << "NTupleTable DESTRUCTOR CALLED" << std::endl;
+    }
+
+    int size() const {
+        return data.size();
+    }
+
     NTupleValue& operator()(const NTuple &tuple) {
+        assert( data.size() > 0 );
         return data[tuple_to_index(tuple)];
     }
 
     const NTupleValue& operator()(const NTuple &tuple) const {
+        assert( data.size() > 0 );
         return data[tuple_to_index(tuple)];
-    }
-
-    void promote(const NTupleTable &other) {
-        int promoted = 0;
-        for (int i = 0; i < data.size(); i++) {
-            if (data[i] == 0) {
-                data[i] = other.data[i];
-                promoted++;
-            }
-        }
-        std::cout << "Promoted " << promoted << " params." << std::endl;
     }
 
     void save(std::ofstream &stream) const {

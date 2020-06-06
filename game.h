@@ -9,7 +9,7 @@ namespace Game {
 
     constexpr State EMPTY_STATE = 0;
 
-    constexpr int MAX_TILE    = 14;
+    constexpr int MAX_TILE    = 15;
     constexpr int EDGE_SIZE   = 4;
     constexpr int BOARD_SIZE  = EDGE_SIZE * EDGE_SIZE;
     constexpr int NUM_ACTIONS = 4;
@@ -98,10 +98,9 @@ namespace Game {
 
     State place_random_tile(const State &state, const Game::State &rand, const Game::Tile &tile);
 
-    State rand64();
+    uint64_t rand64();
     State rand_state();
     Tile  rand_tile();
-    Tile  uniform_rand_tile();
 
     struct Transition {
         State  state;

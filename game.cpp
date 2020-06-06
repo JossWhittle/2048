@@ -138,11 +138,11 @@ Game::State Game::place_random_tile(const Game::State &state, const Game::State 
     return state;
 }
 
-Game::State Game::rand64() {
+uint64_t Game::rand64() {
     static std::mt19937_64 engine((std::random_device())());
     static std::uniform_int_distribution<long long int> dist(std::llround(std::pow(2,61)),
                                                              std::llround(std::pow(2,62)));
-    return Game::State(dist(engine));
+    return uint64_t(dist(engine));
 }
 
 Game::State Game::rand_state() {
@@ -151,10 +151,6 @@ Game::State Game::rand_state() {
 
 Game::Tile Game::rand_tile() {
     return ((Game::rand64() % 10) == 0) ? Game::Tiles::TILE_4 : Game::Tiles::TILE_2;
-}
-
-Game::Tile Game::uniform_rand_tile() {
-    return 1 + (Game::rand64() % (Game::MAX_TILE - 1));
 }
 
 Game::Transition Game::transition(const Game::State &state, const Game::Action &action) {
