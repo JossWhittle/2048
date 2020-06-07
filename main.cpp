@@ -19,25 +19,19 @@ int main() {
 
     // Start from the last phase and work backwards towards 2048
     for (int phase = 0, epoch = 0; phase <= Agent::NUM_PHASES; phase++) {
-
-        const int end_phase = std::min((phase + 2), Agent::END_PHASE);
-
         for (int phase_epoch = 0; phase_epoch < TRAIN_EPOCHS; phase_epoch++, epoch++) {
 
             std::cout << std::endl << "Phase " << phase << " Phase Epoch " << phase_epoch << " Epoch " << epoch << std::endl;
 
             // Perform one epoch of training
-            Agent::train_agent(epoch, TRAIN_GAMES, phase, end_phase, LEARNING_RATE, params, log_train);
-
-            // Save the current params for all phases greater than and including the current phase
-//            for (int i = 0; i <= phase; i++) {
-//                Agent::save(STRING( "./logs/params phase_" << phase << "_" << i << ".bin" ), params[i]);
-//            }
+            Agent::train_agent(epoch, TRAIN_GAMES, phase, Agent::END_PHASE, LEARNING_RATE, params, log_train);
 
             // Play evaluation games and log stats
-            Agent::evaluate_agent(epoch, 1000, 0, end_phase, 1, params, log_eval);
-            Agent::evaluate_agent(epoch, 100,  0, end_phase, 2, params, log_eval);
+            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, params, log_eval);
+            Agent::evaluate_agent(epoch, 100,  0, Agent::END_PHASE, 2, params, log_eval);
         }
+
+        Agent::save("./logs/params.bin", params);
     }
 
     return 0;
