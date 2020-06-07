@@ -26,7 +26,7 @@ namespace Agent {
         NTupleTable_3 table_3;
     };
 
-    constexpr int NUM_PHASES = 7, END_PHASE = (NUM_PHASES + 1);
+    constexpr int NUM_PHASES = 15, END_PHASE = (NUM_PHASES + 1);
     using PhaseParams = std::array<Agent::Params, NUM_PHASES+1>;
 
     // Each NTupleTable has a retina function that extracts the tuple values from a game state

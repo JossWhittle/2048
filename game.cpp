@@ -124,8 +124,8 @@ Game::State Game::place_random_tile(const Game::State &state, const Game::State 
         for (int x = 0; x < Game::EDGE_SIZE; x++) {
             const Tile tile = Game::get_tile(state, y, x);
             const Tile rand = Game::get_tile(rand_state,  y, x);
-            if ((tile == 0) && (rand > max_rand)) {
-                max_rand = rand;
+            if ((tile == 0) && ((int) rand > max_rand)) {
+                max_rand = (int) rand;
                 max_x    = x;
                 max_y    = y;
             }
@@ -169,16 +169,20 @@ bool Game::terminal(const Game::State &state) {
 
 Game::Tile Game::maximum_tile(const Game::State &state) {
     Game::Tile max_tile = 0;
-    for (int i = 0; i < Game::BOARD_SIZE; i++) {
-        const Game::Tile tile = Game::get_tile(state, i);
-        if (tile > max_tile) max_tile = tile;
+    for (int y = 0; y < Game::EDGE_SIZE; y++) {
+        for (int x = 0; x < Game::EDGE_SIZE; x++) {
+            const Game::Tile tile = Game::get_tile(state, y, x);
+            if (tile > max_tile) max_tile = tile;
+        }
     }
     return max_tile;
 }
 
 bool Game::has_tile(const Game::State &state, const Game::Tile &tile) {
-    for (int i = 0; i < Game::BOARD_SIZE; i++) {
-        if (Game::get_tile(state, i) == tile) return true;
+    for (int y = 0; y < Game::EDGE_SIZE; y++) {
+        for (int x = 0; x < Game::EDGE_SIZE; x++) {
+            if (Game::get_tile(state, y, x) == tile) return true;
+        }
     }
     return false;
 }

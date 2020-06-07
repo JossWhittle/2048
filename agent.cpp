@@ -335,7 +335,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
-        Game::State state = Agent::random_phase_state((Game::rand64() % 2 == 0) ? start_phase : 0);
+        Game::State state = Agent::random_phase_state((game % (start_phase + 1)));
 
         for (int step = 0;; step++) {
 
@@ -451,7 +451,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int start
         if (max_tile >= Game::Tiles::TILE_16384) tile_16384++;
         if (max_tile >= Game::Tiles::TILE_32768) tile_32768++;
 
-        const int state_phase = Agent::phase(state);
+        const float state_phase = (float) Agent::phase(state);
         avg_phase += state_phase;
         if (state_phase > maximum_phase) maximum_phase = state_phase;
 
@@ -477,12 +477,14 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int start
          << end_phase << ','
          << depth << ','
          << std::setprecision(4) << delta_time << ','
+
          << (int) maximum_phase << ','
-         << (int) (avg_phase  / (float) num_games) << ','
+         << std::setprecision(4) << (avg_phase  / (float) num_games) << ','
          << (int) maximum_score << ','
-         << (int) (avg_score  / (float) num_games) << ','
-         << (int) std::pow(2, maximum_tile) << ','
-         << (int) std::pow(2, avg_tile  / (float) num_games) << ','
+         << std::setprecision(4) << (avg_score  / (float) num_games) << ','
+         << (int) maximum_tile << ','
+         << std::setprecision(4) << (avg_tile   / (float) num_games) << ','
+
          << std::setprecision(4) << (tile_128   / (float) num_games) << ','
          << std::setprecision(4) << (tile_256   / (float) num_games) << ','
          << std::setprecision(4) << (tile_512   / (float) num_games) << ','
