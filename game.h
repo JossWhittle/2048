@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <inttypes.h>
 
 namespace Game {
@@ -9,10 +10,11 @@ namespace Game {
 
     constexpr State EMPTY_STATE = 0;
 
-    constexpr int MAX_TILE    = 15;
-    constexpr int EDGE_SIZE   = 4;
-    constexpr int BOARD_SIZE  = EDGE_SIZE * EDGE_SIZE;
-    constexpr int NUM_ACTIONS = 4;
+    constexpr int BITS_PER_TILE = 4;
+    constexpr int MAX_TILE      = 15;
+    constexpr int EDGE_SIZE     = 4;
+    constexpr int BOARD_SIZE    = EDGE_SIZE * EDGE_SIZE;
+    constexpr int NUM_ACTIONS   = 4;
 
     enum Tiles : Tile {
         TILE_2     = 1,
@@ -39,46 +41,24 @@ namespace Game {
         LEFT  = 3
     };
 
-    constexpr unsigned int TILE_INDEX[EDGE_SIZE][EDGE_SIZE] = {
-            {  0,  1,  2,  3 },
-            {  4,  5,  6,  7 },
-            {  8,  9, 10, 11 },
-            { 12, 13, 14, 15 }
-    };
-
-    constexpr unsigned int TILE_OFFSETS[EDGE_SIZE][EDGE_SIZE] = {
-            {  0,  4,  8, 12 },
-            { 16, 20, 24, 28 },
-            { 32, 36, 40, 44 },
-            { 48, 52, 56, 60 },
-    };
-
-    constexpr State TILE_MASK = ((1u << 4u) - 1u);
-    constexpr State TILE_MASKS[EDGE_SIZE][EDGE_SIZE] = {
-        {
-            (TILE_MASK),
-            (TILE_MASK << 4u),
-            (TILE_MASK << 8u),
-            (TILE_MASK << 12u),
-        },
-        {
-            (TILE_MASK << 16u),
-            (TILE_MASK << 20u),
-            (TILE_MASK << 24u),
-            (TILE_MASK << 28u),
-        },
-        {
-            (TILE_MASK << 32u),
-            (TILE_MASK << 36u),
-            (TILE_MASK << 40u),
-            (TILE_MASK << 44u),
-        },
-        {
-            (TILE_MASK << 48u),
-            (TILE_MASK << 52u),
-            (TILE_MASK << 56u),
-            (TILE_MASK << 60u),
-        }
+    constexpr State TILE_MASK = ((1u << BITS_PER_TILE) - 1u);
+    constexpr State INV_TILE_MASKS[BOARD_SIZE] = {
+        ~(TILE_MASK),
+        ~(TILE_MASK << 4u),
+        ~(TILE_MASK << 8u),
+        ~(TILE_MASK << 12u),
+        ~(TILE_MASK << 16u),
+        ~(TILE_MASK << 20u),
+        ~(TILE_MASK << 24u),
+        ~(TILE_MASK << 28u),
+        ~(TILE_MASK << 32u),
+        ~(TILE_MASK << 36u),
+        ~(TILE_MASK << 40u),
+        ~(TILE_MASK << 44u),
+        ~(TILE_MASK << 48u),
+        ~(TILE_MASK << 52u),
+        ~(TILE_MASK << 56u),
+        ~(TILE_MASK << 60u),
     };
 
     Tile  get_tile(const State &state, const int i);

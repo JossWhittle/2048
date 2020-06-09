@@ -6,27 +6,23 @@
 #include <cmath>
 
 Game::Tile Game::get_tile(const Game::State &state, const int i) {
-    const int x =       i % Game::EDGE_SIZE;
-    const int y = (i - x) / Game::EDGE_SIZE;
-    return Game::get_tile(state, y, x);
+    return (state >> (i * Game::BITS_PER_TILE)) & Game::TILE_MASK;
 }
 
 Game::Tile Game::get_tile(const Game::State &state, const int y, const int x) {
-    return (state & Game::TILE_MASKS[y][x]) >> Game::TILE_OFFSETS[y][x];
+    return Game::get_tile(state, x + (y * Game::EDGE_SIZE));
 }
 
 Game::State Game::set_tile(const Game::State &state, const int i, const Game::Tile &value) {
-    const int x =       i % Game::EDGE_SIZE;
-    const int y = (i - x) / Game::EDGE_SIZE;
-    return Game::set_tile(state, y, x, value);
+    return (state & Game::INV_TILE_MASKS[i]) ^ (State(value) << (i * Game::BITS_PER_TILE));
 }
 
 Game::State Game::set_tile(const Game::State &state, const int y, const int x, const Game::Tile &value) {
-    return (state & ~(Game::TILE_MASKS[y][x])) ^ (State(value) << Game::TILE_OFFSETS[y][x]);
+    return Game::set_tile(state, x + (y * Game::EDGE_SIZE), value);
 }
 
 Game::State Game::flip(const Game::State &state) {
-    State new_state = 0;
+    Game::State new_state = Game::EMPTY_STATE;
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
         for (int x = 0; x < Game::EDGE_SIZE; x++) {
             new_state = Game::set_tile(new_state, y, x, Game::get_tile(state, y, (Game::EDGE_SIZE - 1) - x));
@@ -36,7 +32,7 @@ Game::State Game::flip(const Game::State &state) {
 }
 
 Game::State Game::rot90(const Game::State &state) {
-    State new_state = 0;
+    Game::State new_state = Game::EMPTY_STATE;
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
         for (int x = 0; x < Game::EDGE_SIZE; x++) {
             new_state = Game::set_tile(new_state, y, x, Game::get_tile(state, (Game::EDGE_SIZE - 1) - x, y));
@@ -46,7 +42,7 @@ Game::State Game::rot90(const Game::State &state) {
 }
 
 Game::State Game::rot180(const Game::State &state) {
-    State new_state = 0;
+    Game::State new_state = Game::EMPTY_STATE;
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
         for (int x = 0; x < Game::EDGE_SIZE; x++) {
             new_state = Game::set_tile(new_state, y, x, Game::get_tile(state, (Game::EDGE_SIZE - 1) - y, (Game::EDGE_SIZE - 1) - x));
@@ -56,7 +52,7 @@ Game::State Game::rot180(const Game::State &state) {
 }
 
 Game::State Game::rot270(const Game::State &state) {
-    State new_state = 0;
+    Game::State new_state = Game::EMPTY_STATE;
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
         for (int x = 0; x < Game::EDGE_SIZE; x++) {
             new_state = Game::set_tile(new_state, y, x, Game::get_tile(state, x, (Game::EDGE_SIZE - 1) - y));
@@ -66,7 +62,7 @@ Game::State Game::rot270(const Game::State &state) {
 }
 
 Game::State Game::slide_left(const Game::State &state) {
-    State new_state = 0;
+    Game::State new_state = Game::EMPTY_STATE;
     for (int y = 0; y < Game::EDGE_SIZE; y++) {
         for (int ox = 0, x = 0; ox < Game::EDGE_SIZE; ox++) {
             const Tile tile = Game::get_tile(state, y, ox);
@@ -80,20 +76,20 @@ Game::State Game::merge_left(const Game::State &state, float &reward) {
     reward = 0;
 
     // Compact the zeros before merging
-    State new_state = Game::slide_left(state);
+    Game::State new_state = Game::slide_left(state);
 
     // Merge each row
-    for (int y = 0; y < Game::EDGE_SIZE; y++) {
+    for (int y = 0, i = 1; y < Game::EDGE_SIZE; y++, i++) {
 
         // For each tile, merge if it is next to the same tile
-        for (int x = 1; x < Game::EDGE_SIZE; x++) {
-            const Tile tile = Game::get_tile(new_state, y, x);
-            if ((tile > 0) && (Game::get_tile(new_state, y, (x - 1)) == tile)) {
+        for (int x = 1; x < Game::EDGE_SIZE; x++, i++) {
+            const Tile tile = Game::get_tile(new_state, i);
+            if ((tile > 0) && (Game::get_tile(new_state, (i - 1)) == tile)) {
 
                 // Reward is the sum of the two tiles merged
                 reward += std::pow(2, (tile + 1));
-                new_state = Game::set_tile(new_state, y, (x - 1), 0);
-                new_state = Game::set_tile(new_state, y, x, (tile + 1));
+                new_state = Game::set_tile(new_state, (i - 1), 0);
+                new_state = Game::set_tile(new_state, i, (tile + 1));
             }
         }
     }
@@ -117,23 +113,21 @@ Game::State Game::merge(const Game::State &state, const Game::Action &action, fl
 
 Game::State Game::place_random_tile(const Game::State &state, const Game::State &rand_state, const Game::Tile &new_tile) {
     int max_rand = -1,
-        max_x    = -1,
-        max_y    = -1;
+        max_i    = -1;
 
-    for (int y = 0; y < Game::EDGE_SIZE; y++) {
-        for (int x = 0; x < Game::EDGE_SIZE; x++) {
-            const Tile tile = Game::get_tile(state, y, x);
-            const Tile rand = Game::get_tile(rand_state,  y, x);
-            if ((tile == 0) && ((int) rand > max_rand)) {
-                max_rand = (int) rand;
-                max_x    = x;
-                max_y    = y;
-            }
+    for (int i = 0; i < Game::BOARD_SIZE; i++) {
+
+        const Tile tile = Game::get_tile(state, i);
+        const Tile rand = Game::get_tile(rand_state,  i);
+
+        if ((tile == 0) && ((int) rand > max_rand)) {
+            max_rand = (int) rand;
+            max_i    = i;
         }
     }
 
     if (max_rand >= 0) {
-        return Game::set_tile(state, max_y, max_x, new_tile);
+        return Game::set_tile(state, max_i, new_tile);
     }
     return state;
 }
@@ -169,20 +163,16 @@ bool Game::terminal(const Game::State &state) {
 
 Game::Tile Game::maximum_tile(const Game::State &state) {
     Game::Tile max_tile = 0;
-    for (int y = 0; y < Game::EDGE_SIZE; y++) {
-        for (int x = 0; x < Game::EDGE_SIZE; x++) {
-            const Game::Tile tile = Game::get_tile(state, y, x);
-            if (tile > max_tile) max_tile = tile;
-        }
+    for (int i = 0; i < Game::BOARD_SIZE; i++) {
+        const Game::Tile tile = Game::get_tile(state, i);
+        if (tile > max_tile) max_tile = tile;
     }
     return max_tile;
 }
 
 bool Game::has_tile(const Game::State &state, const Game::Tile &tile) {
-    for (int y = 0; y < Game::EDGE_SIZE; y++) {
-        for (int x = 0; x < Game::EDGE_SIZE; x++) {
-            if (Game::get_tile(state, y, x) == tile) return true;
-        }
+    for (int i = 0; i < Game::BOARD_SIZE; i++) {
+        if (Game::get_tile(state, i) == tile) return true;
     }
     return false;
 }

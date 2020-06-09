@@ -35,11 +35,6 @@ namespace Agent {
     NTupleTable_2::NTuple retina_2(const Game::State &state);
     NTupleTable_3::NTuple retina_3(const Game::State &state);
 
-    struct Trace {
-        Game::State after_state;
-        Game::State new_state;
-    };
-
     // Approximate value of a state is the sum over the response from each NTupleTable evaluated on all 8 symmetries of the state
     float evaluate_state(const Game::State &state, const PhaseParams &params);
 

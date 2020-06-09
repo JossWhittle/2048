@@ -246,15 +246,15 @@ float Agent::expectimax_estimate_chance_value(const Game::State &state, const in
 
         // Sum weighted average over expectations of the chance states.
         // 2 is placed 90% of the time, 4 is placed 10% of the time.
-        const float value_2 = Agent::expectimax_search_max_action_value(state_2, depth, params) * 0.9f;
+        const float value_2 = Agent::expectimax_search_max_action_value(state_2, depth, params);
         if (value_2 > 0) {
             sum_weight       += 0.9f;
-            sum_chance_value += value_2;
+            sum_chance_value += 0.9f * value_2;
         }
-        const float value_4 = Agent::expectimax_search_max_action_value(state_4, depth, params) * 0.1f;
+        const float value_4 = Agent::expectimax_search_max_action_value(state_4, depth, params);
         if (value_4 > 0) {
             sum_weight       += 0.1f;
-            sum_chance_value += value_4;
+            sum_chance_value += 0.1f * value_4;
         }
     }
 
@@ -328,7 +328,7 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     // Variables for accumulating statistics
     float sum_loss = 0, sum_weight = 0;
 
-    std::vector<Agent::Trace> trace;
+    std::vector<Game::State> trace;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
     #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight) private(trace)
@@ -354,21 +354,16 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
             if (state == new_state) break;
 
             // If the game continues, then the expected value for this new state should be updated based on the best future reward
-            trace.push_back(Agent::Trace{ transition.after_state, new_state });
-//            const float target_value = Agent::expectimax_search_max_action_value(new_state, 1, params);
-//            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
-//            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
-//            sum_weight++;
+            trace.push_back(transition.after_state);
 
             // Update to the next state
             state = new_state;
         }
 
         while (!trace.empty()) {
-            const auto   &transition = trace.back();
-            const float target_value = Agent::expectimax_search_max_action_value(transition.new_state, 1, params);
-//            sum_loss += Agent::update_state_TD0(transition.after_state, target_value, learning_rate, params);
-            sum_loss += Agent::update_state_TC0(transition.after_state, target_value, learning_rate, params);
+            const Game::State &after_state = trace.back();
+            const float target_value = Agent::expectimax_estimate_chance_value(after_state, 1, params);
+            sum_loss += Agent::update_state_TC0(after_state, target_value, learning_rate, params);
             sum_weight++;
             trace.pop_back();
         }
