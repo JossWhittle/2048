@@ -27,8 +27,12 @@ int main() {
             Agent::train_agent(epoch, TRAIN_GAMES, phase, Agent::END_PHASE, LEARNING_RATE, params, log_train);
 
             // Play evaluation games and log stats
-            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, params, log_eval);
-            Agent::evaluate_agent(epoch, 100,  0, Agent::END_PHASE, 2, params, log_eval);
+            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, 1, Agent::Deadline::NO_DEADLINE, params, log_eval);
+            Agent::evaluate_agent(epoch, 100,  0, Agent::END_PHASE, 2, 2, Agent::Deadline::NO_DEADLINE, params, log_eval);
+
+//            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, 5, 10,  params, log_eval);
+//            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, 5, 50,  params, log_eval);
+//            Agent::evaluate_agent(epoch, 1000, 0, Agent::END_PHASE, 1, 5, 100, params, log_eval);
         }
 
         Agent::save("./logs/params.bin", params);

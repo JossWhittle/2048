@@ -1,7 +1,7 @@
 #include <iomanip>
 #include <iostream>
 #include <chrono>
-#include <stack>
+#include <queue>
 #include <tuple>
 
 #include <omp.h>
@@ -92,76 +92,9 @@ float Agent::evaluate_state(const Game::State &state, const Agent::PhaseParams &
     return observed_value;
 }
 
-//float Agent::update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
-//    // Unpack Agent parameters as modifiable references
-//    const int phase = Agent::phase(state);
-//    Agent::NTupleTable_0 &table_0 = params[phase].table_0;
-//    Agent::NTupleTable_1 &table_1 = params[phase].table_1;
-//    Agent::NTupleTable_2 &table_2 = params[phase].table_2;
-//    Agent::NTupleTable_3 &table_3 = params[phase].table_3;
-//
-//    // Apply each retina and table 8 times for each symmetry
-//    const Game::State &s_00 = state;
-//    const Game::State  s_10 = Game::rot90(state);
-//    const Game::State  s_20 = Game::rot180(state);
-//    const Game::State  s_30 = Game::rot270(state);
-//    const Game::State  s_01 = Game::flip(state);
-//    const Game::State  s_11 = Game::rot90(s_01);
-//    const Game::State  s_21 = Game::rot180(s_01);
-//    const Game::State  s_31 = Game::rot270(s_01);
-//
-//    // Evaluate retina and addressing functions once and use them for both observed value computation and applying updates
-//    Agent::NTupleTable_0::NTupleValue
-//            &t_0_00 = table_0(Agent::retina_0(s_00)), &t_0_10 = table_0(Agent::retina_0(s_10)),
-//            &t_0_20 = table_0(Agent::retina_0(s_20)), &t_0_30 = table_0(Agent::retina_0(s_30)),
-//            &t_0_01 = table_0(Agent::retina_0(s_01)), &t_0_11 = table_0(Agent::retina_0(s_11)),
-//            &t_0_21 = table_0(Agent::retina_0(s_21)), &t_0_31 = table_0(Agent::retina_0(s_31));
-//
-//    Agent::NTupleTable_1::NTupleValue
-//            &t_1_00 = table_1(Agent::retina_1(s_00)), &t_1_10 = table_1(Agent::retina_1(s_10)),
-//            &t_1_20 = table_1(Agent::retina_1(s_20)), &t_1_30 = table_1(Agent::retina_1(s_30)),
-//            &t_1_01 = table_1(Agent::retina_1(s_01)), &t_1_11 = table_1(Agent::retina_1(s_11)),
-//            &t_1_21 = table_1(Agent::retina_1(s_21)), &t_1_31 = table_1(Agent::retina_1(s_31));
-//
-//    Agent::NTupleTable_2::NTupleValue
-//            &t_2_00 = table_2(Agent::retina_2(s_00)), &t_2_10 = table_2(Agent::retina_2(s_10)),
-//            &t_2_20 = table_2(Agent::retina_2(s_20)), &t_2_30 = table_2(Agent::retina_2(s_30)),
-//            &t_2_01 = table_2(Agent::retina_2(s_01)), &t_2_11 = table_2(Agent::retina_2(s_11)),
-//            &t_2_21 = table_2(Agent::retina_2(s_21)), &t_2_31 = table_2(Agent::retina_2(s_31));
-//
-//    Agent::NTupleTable_3::NTupleValue
-//            &t_3_00 = table_3(Agent::retina_3(s_00)), &t_3_10 = table_3(Agent::retina_3(s_10)),
-//            &t_3_20 = table_3(Agent::retina_3(s_20)), &t_3_30 = table_3(Agent::retina_3(s_30)),
-//            &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
-//            &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
-//
-//    // Response is sum over all retinas
-//    const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
-//                               + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
-//                               + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
-//                               + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
-//
-//    // TD(0) Temporal Difference Learning
-//    const float error = expected_value - observed_value;
-//    const float delta = error * learning_rate;
-//
-//    // Update all NTupleTables at all the accessed addresses
-//    t_0_00 += delta; t_0_10 += delta; t_0_20 += delta; t_0_30 += delta;
-//    t_0_01 += delta; t_0_11 += delta; t_0_21 += delta; t_0_31 += delta;
-//    t_1_00 += delta; t_1_10 += delta; t_1_20 += delta; t_1_30 += delta;
-//    t_1_01 += delta; t_1_11 += delta; t_1_21 += delta; t_1_31 += delta;
-//    t_2_00 += delta; t_2_10 += delta; t_2_20 += delta; t_2_30 += delta;
-//    t_2_01 += delta; t_2_11 += delta; t_2_21 += delta; t_2_31 += delta;
-//    t_3_00 += delta; t_3_10 += delta; t_3_20 += delta; t_3_30 += delta;
-//    t_3_01 += delta; t_3_11 += delta; t_3_21 += delta; t_3_31 += delta;
-//
-//    // Return L1 loss
-//    return std::abs(error);
-//}
-
-float Agent::update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, Agent::PhaseParams &params) {
+void Agent::update_state_TC(const Game::State &state, const float &error, const float &learning_rate, Agent::PhaseParams &params) {
     const int phase = Agent::phase(state);
-    if (phase >= params.size()) return 0;
+    if (phase >= params.size()) return;
 
     // Unpack Agent parameters as modifiable references
     Agent::NTupleTable_0 &table_0 = params[phase].table_0;
@@ -204,15 +137,6 @@ float Agent::update_state_TC0(const Game::State &state, const float &expected_va
             &t_3_01 = table_3(Agent::retina_3(s_01)), &t_3_11 = table_3(Agent::retina_3(s_11)),
             &t_3_21 = table_3(Agent::retina_3(s_21)), &t_3_31 = table_3(Agent::retina_3(s_31));
 
-    // Response is sum over all retinas
-    const float observed_value = (t_0_00 + t_0_10 + t_0_20 + t_0_30) + (t_0_01 + t_0_11 + t_0_21 + t_0_31)
-                               + (t_1_00 + t_1_10 + t_1_20 + t_1_30) + (t_1_01 + t_1_11 + t_1_21 + t_1_31)
-                               + (t_2_00 + t_2_10 + t_2_20 + t_2_30) + (t_2_01 + t_2_11 + t_2_21 + t_2_31)
-                               + (t_3_00 + t_3_10 + t_3_20 + t_3_30) + (t_3_01 + t_3_11 + t_3_21 + t_3_31);
-
-    // TC(0) Temporal Coherence Learning
-    const float error = expected_value - observed_value;
-
     // Update all NTupleTables at all the accessed addresses
     t_0_00.update(error, learning_rate); t_0_10.update(error, learning_rate); t_0_20.update(error, learning_rate); t_0_30.update(error, learning_rate);
     t_0_01.update(error, learning_rate); t_0_11.update(error, learning_rate); t_0_21.update(error, learning_rate); t_0_31.update(error, learning_rate);
@@ -225,16 +149,16 @@ float Agent::update_state_TC0(const Game::State &state, const float &expected_va
 
     t_3_00.update(error, learning_rate); t_3_10.update(error, learning_rate); t_3_20.update(error, learning_rate); t_3_30.update(error, learning_rate);
     t_3_01.update(error, learning_rate); t_3_11.update(error, learning_rate); t_3_21.update(error, learning_rate); t_3_31.update(error, learning_rate);
-
-    return std::abs(error);
 }
 
-float Agent::expectimax_estimate_chance_value(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
+float Agent::expectimax_estimate_chance_value(const Game::State &state, const int depth, const Agent::Deadline &deadline,
+                                              const Agent::PhaseParams &params, Agent::StateValueCache &state_cache) {
 
-    float sum_chance_value = 0, sum_weight = 0;
+    float expectation = 0;
 
     // Consider each tile on the board
     for (int tile_index = 0; tile_index < Game::BOARD_SIZE; tile_index++) {
+        if (deadline.expired()) break;
 
         // If this tile is not empty then skip
         if (Game::get_tile(state, tile_index) > 0)
@@ -246,41 +170,56 @@ float Agent::expectimax_estimate_chance_value(const Game::State &state, const in
 
         // Sum weighted average over expectations of the chance states.
         // 2 is placed 90% of the time, 4 is placed 10% of the time.
-        const float value_2 = Agent::expectimax_search_max_action_value(state_2, depth, params);
+        const float value_2 = Agent::expectimax_search_max_action_value(state_2, depth, deadline, params, state_cache);
         if (value_2 > 0) {
-            sum_weight       += 0.9f;
-            sum_chance_value += 0.9f * value_2;
+            expectation += 0.9f * value_2;
         }
-        const float value_4 = Agent::expectimax_search_max_action_value(state_4, depth, params);
+        const float value_4 = Agent::expectimax_search_max_action_value(state_4, depth, deadline, params, state_cache);
         if (value_4 > 0) {
-            sum_weight       += 0.1f;
-            sum_chance_value += 0.1f * value_4;
+            expectation += 0.1f * value_4;
         }
     }
 
     // Weighted average over potential chance states
-    return (sum_chance_value > 0) ? (sum_chance_value / sum_weight) : 0;
+    return expectation;
 }
 
-float Agent::expectimax_search_max_action_value(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
+float Agent::expectimax_afterstate_value(const Game::State &after_state, const int depth, const Agent::Deadline &deadline,
+                                         const Agent::PhaseParams &params, Agent::StateValueCache &state_cache) {
+
+    const auto &cached_value = state_cache.find(after_state);
+    if (cached_value != state_cache.end()) {
+        return cached_value->second;
+    }
+
+    float expectation = 0;
+    if (depth > 1) {
+        expectation = Agent::expectimax_estimate_chance_value(after_state, (depth - 1), deadline, params, state_cache);
+    }
+    else {
+        expectation = Agent::evaluate_state(after_state, params);
+    }
+
+    // Cache this transition
+    state_cache.insert({ after_state, expectation });
+
+    return expectation;
+}
+
+float Agent::expectimax_search_max_action_value(const Game::State &state, const int depth, const Agent::Deadline &deadline,
+                                                const Agent::PhaseParams &params, Agent::StateValueCache &state_cache) {
 
     float max_value = 0;
 
     for (int action = Game::Action::UP; action < Game::NUM_ACTIONS; action++) {
+
         // Try out each action and compare the values of the transitions to after_states
         const Game::Transition transition = Game::transition(state, static_cast<Game::Action>(action));
 
         // Don't consider any action that does not change the game state
         if (transition.terminal) continue;
 
-        // Value of this action is the sum of the local reward and the value of the after_state
-        float value = transition.reward;
-        if (depth > 1) {
-            value += Agent::expectimax_estimate_chance_value(transition.after_state, (depth - 1), params);
-        }
-        else {
-            value += Agent::evaluate_state(transition.after_state, params);
-        }
+        const float value = transition.reward + Agent::expectimax_afterstate_value(transition.after_state, depth, deadline, params, state_cache);
 
         // Select the highest value
         if (value >= max_value) max_value = value;
@@ -289,7 +228,32 @@ float Agent::expectimax_search_max_action_value(const Game::State &state, const 
     return max_value;
 }
 
-Game::Transition Agent::expectimax_search_max_transition(const Game::State &state, const int depth, const Agent::PhaseParams &params) {
+Game::Transition Agent::expectimax_iterative_search_max_transition(const Game::State &state, const int initial_depth, const int max_depth,
+                                                                   const Agent::Deadline &deadline, const Agent::PhaseParams &params) {
+
+    auto start_time = deadline.elapsed();
+    Game::Transition max_transition = Agent::expectimax_search_max_transition(state, initial_depth, deadline, params);
+    auto prev_duration = deadline.elapsed() - start_time;
+
+    for (int depth = (initial_depth + 1); depth <= max_depth; depth++) {
+        if (deadline.remaining() < (2 * prev_duration)) break;
+
+        start_time = deadline.elapsed();
+        Game::Transition iterative_transition = Agent::expectimax_search_max_transition(state, depth, deadline, params);
+        prev_duration = deadline.elapsed() - start_time;
+
+        if (deadline.expired()) break;
+
+        max_transition = iterative_transition;
+    }
+
+    return max_transition;
+}
+
+Game::Transition Agent::expectimax_search_max_transition(const Game::State &state, const int depth,
+                                                         const Agent::Deadline &deadline, const Agent::PhaseParams &params) {
+
+    Agent::StateValueCache state_cache;
 
     Game::Transition max_transition{};
     float max_value = 0;
@@ -301,14 +265,7 @@ Game::Transition Agent::expectimax_search_max_transition(const Game::State &stat
         // Don't consider any action that does not change the game state
         if (transition.terminal) continue;
 
-        // Value of this action is the sum of the local reward and the value of the after_state
-        float value = transition.reward;
-        if (depth > 1) {
-            value += Agent::expectimax_estimate_chance_value(transition.after_state, (depth - 1), params);
-        }
-        else {
-            value += Agent::evaluate_state(transition.after_state, params);
-        }
+        const float value = transition.reward + Agent::expectimax_afterstate_value(transition.after_state, depth, deadline, params, state_cache);
 
         // Select the highest value
         if (value >= max_value) {
@@ -317,10 +274,12 @@ Game::Transition Agent::expectimax_search_max_transition(const Game::State &stat
         }
     }
 
+    max_transition.value = max_value;
     return max_transition;
 }
 
-float Agent::train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const float learning_rate, Agent::PhaseParams &params, std::ostream &log) {
+void Agent::train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase,
+                         const float learning_rate, Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -328,44 +287,59 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
     // Variables for accumulating statistics
     float sum_loss = 0, sum_weight = 0;
 
-    std::vector<Game::State> trace;
+    constexpr float lambda     = 0.5;
+    const int       trace_size = 3;
 
     // Parallelize over independent games, reduce statistics between threads to avoid race conditions
-    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight) private(trace)
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(Agent::CPU_THREADS) reduction(+:sum_loss,sum_weight)
     for (int game = 0; game < num_games; game++) {
 
         // Place a random tile to start
         Game::State state = Agent::random_phase_state((game % (start_phase + 1)));
+
+        std::deque<Agent::Trace> traces;
+        Game::State prev_after_state = Game::EMPTY_STATE;
 
         for (int step = 0;; step++) {
 
             if ((Agent::phase(state) >= end_phase) || Game::terminal(state)) break;
 
             // Expectimax search for best local action
-            const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, params);
+            const Game::Transition transition = Agent::expectimax_search_max_transition(state, 1, Agent::Deadline(Agent::Deadline::NO_DEADLINE), params);
 
             // Test if action ended the game
             if (transition.terminal) break;
 
             // Place a random tile
-            const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(), Game::rand_tile());
+            const Game::State new_state = Game::place_random_tile(transition.after_state, Game::rand_state(),
+                                                                  Game::rand_tile());
+
+            // TC(lambda)
+            if (prev_after_state != Game::EMPTY_STATE) {
+                const float error = transition.value - Agent::evaluate_state(prev_after_state, params);
+                traces.push_back(Agent::Trace{prev_after_state, error});
+
+                if (traces.size() >= trace_size) {
+                    float lambda_error = 0, lam = 1;
+                    for (auto &trace : traces) {
+                        lambda_error += trace.error * lam;
+                        lam *= lambda;
+                    }
+
+                    sum_loss += lambda_error;
+                    sum_weight++;
+
+                    Agent::update_state_TC(traces.front().after_state, lambda_error, learning_rate, params);
+                    traces.pop_front();
+                }
+            }
 
             // If placing a tile puts the game into a terminal state then end the game
             if (state == new_state) break;
 
-            // If the game continues, then the expected value for this new state should be updated based on the best future reward
-            trace.push_back(transition.after_state);
-
             // Update to the next state
             state = new_state;
-        }
-
-        while (!trace.empty()) {
-            const Game::State &after_state = trace.back();
-            const float target_value = Agent::expectimax_estimate_chance_value(after_state, 1, params);
-            sum_loss += Agent::update_state_TC0(after_state, target_value, learning_rate, params);
-            sum_weight++;
-            trace.pop_back();
+            prev_after_state = transition.after_state;
         }
     }
 
@@ -384,11 +358,10 @@ float Agent::train_agent(const int epoch, const int num_games, const int start_p
 
     std::cout << std::endl << "Epoch " << epoch << " training   completed in "
               << std::setprecision(4) << (delta_time / 1000.f) << " seconds..." << std::endl;
-
-    return (sum_loss / sum_weight);
 }
 
-void Agent::evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const int depth, const Agent::PhaseParams &params, std::ostream &log) {
+void Agent::evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase,
+                          const int initial_depth, const int max_depth, const int max_duration, const Agent::PhaseParams &params, std::ostream &log) {
 
     // Start the clock, Carol
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -414,7 +387,7 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int start
             if ((Agent::phase(state) >= end_phase) || Game::terminal(state)) break;
 
             // Expectimax search 1-ply for best local action
-            const Game::Transition transition = Agent::expectimax_search_max_transition(state, depth, params);
+            const Game::Transition transition = Agent::expectimax_iterative_search_max_transition(state, initial_depth, max_depth, Agent::Deadline(max_duration), params);
 
             // Game score is sum of transition rewards
             score += transition.reward;
@@ -470,7 +443,8 @@ void Agent::evaluate_agent(const int epoch, const int num_games, const int start
          << num_games << ','
          << start_phase << ','
          << end_phase << ','
-         << depth << ','
+         << initial_depth << ','
+         << max_duration  << ','
          << std::setprecision(4) << delta_time << ','
 
          << (int) maximum_phase << ','
@@ -558,7 +532,7 @@ std::ofstream Agent::log_evaluation_csv(const std::string &path) {
     std::cout << "success." << std::endl;
 
     if (log.is_open() && (log.tellp() == 0)) {
-        log << "epoch,num_games,start_phase,end_phase,depth,time,max_phase,avg_phase,max_score,avg_score,max_tile,avg_tile,"
+        log << "epoch,num_games,start_phase,end_phase,depth,max_duration,time,max_phase,avg_phase,max_score,avg_score,max_tile,avg_tile,"
             << "tile_128,tile_256,tile_512,tile_1024,tile_2048,tile_4096,"
             << "tile_8192,tile_16384,tile_32768" << std::endl;
     }

@@ -87,6 +87,7 @@ namespace Game {
         Action action;
         State  after_state;
         float  reward;
+        float  value;
         bool   terminal;
     };
 

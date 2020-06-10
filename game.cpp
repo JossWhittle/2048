@@ -150,7 +150,7 @@ Game::Tile Game::rand_tile() {
 Game::Transition Game::transition(const Game::State &state, const Game::Action &action) {
     float reward;
     const Game::State after_state = Game::merge(state, action, reward);
-    return Game::Transition{ state, action, after_state, reward, (state == after_state) };
+    return Game::Transition{ state, action, after_state, reward, 0, (state == after_state) };
 }
 
 bool Game::terminal(const Game::State &state) {

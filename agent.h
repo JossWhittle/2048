@@ -1,8 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <fstream>
 #include <ostream>
+#include <unordered_map>
 
 #include "game.h"
 #include "ntuple.h"
@@ -26,6 +28,38 @@ namespace Agent {
         NTupleTable_3 table_3;
     };
 
+    struct Trace {
+        Game::State after_state;
+        float       error;
+    };
+
+    struct Deadline {
+
+        constexpr static int NO_DEADLINE = 999999999;
+
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
+        int duration;
+
+        Deadline(const int duration) :
+            duration(duration),
+            start_time(std::chrono::high_resolution_clock::now()) {}
+
+        inline int elapsed() const {
+            const auto end_time = std::chrono::high_resolution_clock::now();
+            return std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+        }
+
+        inline int remaining() const {
+            return duration - elapsed();
+        }
+
+        inline bool expired() const {
+            return elapsed() > duration;
+        }
+    };
+
+    using StateValueCache = std::unordered_map<Game::State, float>;
+
     constexpr int NUM_PHASES = 15, END_PHASE = (NUM_PHASES + 1);
     using PhaseParams = std::array<Agent::Params, NUM_PHASES+1>;
 
@@ -38,24 +72,36 @@ namespace Agent {
     // Approximate value of a state is the sum over the response from each NTupleTable evaluated on all 8 symmetries of the state
     float evaluate_state(const Game::State &state, const PhaseParams &params);
 
-    // TD(0) Temporal Difference Learning update params to move estimate for state closer to the target value
 //    float update_state_TD0(const Game::State &state, const float &expected_value, const float &learning_rate, Params &params);
-    float update_state_TC0(const Game::State &state, const float &expected_value, const float &learning_rate, PhaseParams &params);
+    void update_state_TC(const Game::State &state, const float &expected_value, const float &learning_rate, PhaseParams &params);
 
     // Expectimax search for best action from the current state
-    float            expectimax_estimate_chance_value(  const Game::State &state, const int depth, const PhaseParams &params);
-    float            expectimax_search_max_action_value(const Game::State &state, const int depth, const PhaseParams &params);
-    Game::Transition expectimax_search_max_transition(  const Game::State &state, const int depth, const PhaseParams &params);
+    float expectimax_estimate_chance_value(const Game::State &state, const int depth, const Deadline &deadline,
+                                           const PhaseParams &params, StateValueCache &state_cache);
+
+    float expectimax_afterstate_value(const Game::State &after_state, const int depth, const Deadline &deadline,
+                                      const PhaseParams &params, StateValueCache &state_cache);
+
+    float expectimax_search_max_action_value(const Game::State &state, const int depth, const Deadline &deadline,
+                                             const PhaseParams &params, StateValueCache &state_cache);
+
+    Game::Transition expectimax_iterative_search_max_transition(const Game::State &state, const int initial_depth, const int max_depth,
+                                                                const Deadline &deadline, const PhaseParams &params);
+
+    Game::Transition expectimax_search_max_transition(const Game::State &state, const int depth,
+                                                      const Deadline &deadline, const PhaseParams &params);
 
     // Determine if a state meets the criteria to end the game
     int phase(const Game::State &state);
     Game::State random_phase_state(const int phase);
 
     // Play N games on the CPU and update parameters
-    float train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const float learning_rate, PhaseParams &params, std::ostream &log);
+    void train_agent(const int epoch, const int num_games, const int start_phase, const int end_phase,
+                     const float learning_rate, PhaseParams &params, std::ostream &log);
 
     // Play N games on the CPU and evaluate performance
-    void evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase, const int depth, const PhaseParams &params, std::ostream &log);
+    void evaluate_agent(const int epoch, const int num_games, const int start_phase, const int end_phase,
+                        const int initial_depth, const int max_depth, const int max_duration, const PhaseParams &params, std::ostream &log);
 
     // Open a log file and write the column header
     std::ofstream log_training_csv(const std::string &path);
